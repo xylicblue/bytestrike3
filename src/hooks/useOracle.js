@@ -27,7 +27,7 @@ const ORACLE_ABI = [
  * @param {string} oracleAddress - Oracle contract address (defaults to Sepolia oracle)
  * @param {number} refetchInterval - How often to refetch in ms (default: 10000)
  */
-export function useOraclePrice(oracleAddress = SEPOLIA_CONTRACTS.oracle, refetchInterval = 10000) {
+export function useOraclePrice(oracleAddress = SEPOLIA_CONTRACTS.cuOracleAdapter, refetchInterval = 10000) {
   const chainId = useChainId();
 
   const { data, isLoading, error, refetch } = useReadContract({

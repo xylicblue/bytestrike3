@@ -5,6 +5,22 @@ import { SEPOLIA_CONTRACTS, MARKET_IDS } from '../contracts/addresses';
 import ClearingHouseABI from '../contracts/abis/ClearingHouse.json';
 
 const SEPOLIA_CHAIN_ID = 11155111;
+const MARKET_POSITION_CONFIG = [
+  {
+    key: 'H100-GPU-PERP',
+    marketId: MARKET_IDS['H100-GPU-PERP'],
+    vammAddress: SEPOLIA_CONTRACTS.vammProxy,
+    displayName: 'ByteStrike • H100 GPU',
+    baseAssetSymbol: 'GPU-HRS',
+  },
+  {
+    key: 'ETH-PERP-V2',
+    marketId: MARKET_IDS['ETH-PERP-V2'],
+    vammAddress: SEPOLIA_CONTRACTS.vammProxyOld,
+    displayName: 'Legacy ETH ($3.75)',
+    baseAssetSymbol: 'ETH',
+  },
+];
 
 /**
  * Get user's position for a specific market
@@ -75,32 +91,26 @@ export function usePosition(marketId, userAddress = null) {
 export function useAllPositions() {
   const { address } = useAccount();
 
-  // Fetch positions for both markets
-  const ethPerpV2 = usePosition(MARKET_IDS['ETH-PERP-V2'], address);
-  const ethPerp = usePosition(MARKET_IDS['ETH-PERP'], address);
+  const marketPositions = MARKET_POSITION_CONFIG.map((config) => ({
+    config,
+    ...usePosition(config.marketId, address),
+  }));
 
-  const positions = [];
-
-  if (ethPerpV2.position && ethPerpV2.position.hasPosition) {
-    positions.push({
-      marketName: 'ETH-PERP-V2',
-      marketId: MARKET_IDS['ETH-PERP-V2'],
-      ...ethPerpV2.position,
-    });
-  }
-
-  if (ethPerp.position && ethPerp.position.hasPosition) {
-    positions.push({
-      marketName: 'ETH-PERP',
-      marketId: MARKET_IDS['ETH-PERP'],
-      ...ethPerp.position,
-    });
-  }
+  const positions = marketPositions
+    .filter(({ position }) => position?.hasPosition)
+    .map(({ config, position }) => ({
+      marketKey: config.key,
+      marketName: config.displayName,
+      baseAssetSymbol: config.baseAssetSymbol,
+      vammAddress: config.vammAddress,
+      marketId: config.marketId,
+      ...position,
+    }));
 
   return {
     positions,
-    isLoading: ethPerpV2.isLoading || ethPerp.isLoading,
-    error: ethPerpV2.error || ethPerp.error,
+    isLoading: marketPositions.some(({ isLoading }) => isLoading),
+    error: marketPositions.find(({ error }) => error)?.error || null,
   };
 }
 
@@ -323,5 +333,45 @@ export function useMarketRiskParams(marketId) {
     isLoading,
     error,
     refetch,
+  };
+}
+
+/**
+ * Get liquidation buffer + maintenance margin details for a market/account
+ */
+export function useLiquidationStatus(marketId, userAddress = null) {
+  const { address: connectedAddress } = useAccount();
+  const addressToUse = userAddress || connectedAddress;
+  const enabled = !!addressToUse && !!marketId;
+
+  const { data: liquidationData, isLoading: isChecking } = useReadContract({
+    address: SEPOLIA_CONTRACTS.clearingHouse,
+    abi: ClearingHouseABI.abi,
+    functionName: 'isLiquidatable',
+    args: enabled ? [addressToUse, marketId] : undefined,
+    chainId: SEPOLIA_CHAIN_ID,
+    query: {
+      enabled,
+      refetchInterval: 5000,
+    },
+  });
+
+  const { data: maintenanceData, isLoading: isFetchingMargin } = useReadContract({
+    address: SEPOLIA_CONTRACTS.clearingHouse,
+    abi: ClearingHouseABI.abi,
+    functionName: 'getMaintenanceMargin',
+    args: enabled ? [addressToUse, marketId] : undefined,
+    chainId: SEPOLIA_CHAIN_ID,
+    query: {
+      enabled,
+      refetchInterval: 5000,
+    },
+  });
+
+  return {
+    isLiquidatable: Boolean(liquidationData),
+    maintenanceMargin: maintenanceData ? formatUnits(maintenanceData, 18) : '0',
+    maintenanceMarginRaw: maintenanceData,
+    isLoading: isChecking || isFetchingMargin,
   };
 }
