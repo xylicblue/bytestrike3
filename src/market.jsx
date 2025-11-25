@@ -1,14 +1,15 @@
-// src/components/Markets.js --- PURE CSS VERSION ---
+// src/components/Markets.js --- REDESIGNED VERSION ---
 
 import React, { useState, useMemo, useEffect, useRef } from "react";
 import { useMarketsData } from "./marketData";
-// We no longer import any shadcn components
 import { useMarket } from "./marketcontext";
+
 const formatPrice = (price) =>
   price.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+
 const formatPercent = (percent) =>
   `${percent > 0 ? "+" : ""}${percent.toFixed(2)}%`;
 
@@ -16,7 +17,7 @@ export const Markets = () => {
   const { markets, isLoading, error } = useMarketsData();
   const [filter, setFilter] = useState("All");
   const [searchTerm, setSearchTerm] = useState("");
-  const { selectMarket } = useMarket();
+  const { selectMarket, selectedMarket } = useMarket();
   const previousPricesRef = useRef({});
   const [priceChanges, setPriceChanges] = useState({});
 
@@ -30,7 +31,6 @@ export const Markets = () => {
       if (previousPrice !== undefined && previousPrice !== currentPrice) {
         changes[market.name] = currentPrice > previousPrice ? "up" : "down";
 
-        // Clear animation after duration
         setTimeout(() => {
           setPriceChanges((prev) => {
             const updated = { ...prev };
@@ -60,114 +60,123 @@ export const Markets = () => {
   }, [markets, filter, searchTerm]);
 
   if (isLoading)
-    return <div style={{ textAlign: "center" }}>Loading markets...</div>;
-  if (error)
     return (
-      <div style={{ textAlign: "center", color: "#f87171" }}>
-        Failed to load markets.
+      <div className="markets-loading">
+        <div className="markets-loading-spinner"></div>
+        <span>Loading markets...</span>
       </div>
     );
 
-  // We now use standard HTML elements like <input>, <button>, and <table>
+  if (error)
+    return (
+      <div className="markets-error">
+        <span className="markets-error-icon">⚠</span>
+        <span>Failed to load markets</span>
+      </div>
+    );
+
   return (
     <div className="markets-container">
-      <h2>Markets</h2>
-      <div className="markets-controls">
-        {/* --- REPLACED <Tabs> WITH BUTTONS --- */}
-        <div className="markets-tabs-list">
-          <button
-            className={`markets-tabs-trigger ${
-              filter === "All" ? "active" : ""
-            }`}
-            onClick={() => setFilter("All")}
-          >
-            All
-          </button>
-          <button
-            className={`markets-tabs-trigger ${
-              filter === "Perpetual" ? "active" : ""
-            }`}
-            onClick={() => setFilter("Perpetual")}
-          >
-            Perps
-          </button>
-          <button
-            className={`markets-tabs-trigger ${
-              filter === "Future" ? "active" : ""
-            }`}
-            onClick={() => setFilter("Future")}
-          >
-            Futures
-          </button>
-        </div>
+      {/* Header */}
+      <div className="markets-header">
+        <h2>Markets</h2>
+        <span className="markets-count">
+          {filteredAndSearchedMarkets.length}
+        </span>
+      </div>
 
-        {/* --- REPLACED <Input> WITH <input> --- */}
+      {/* Search Input */}
+      <div className="markets-search-wrapper">
+        <svg
+          className="markets-search-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.35-4.35" />
+        </svg>
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="Search markets..."
           className="markets-search-input"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
       </div>
 
-      <div className="table-wrapper">
-        {/* --- REPLACED <Table> WITH <table> --- */}
-        <table className="markets-table">
-          <thead>
-            <tr>
-              <th>Market</th>
-              <th className="text-right">Price</th>
-              <th className="text-right">24h Chg</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredAndSearchedMarkets.map((market) => (
-              <tr key={market.name} onClick={() => selectMarket(market.name)}>
-                <td className="font-medium">
+      {/* Filter Tabs */}
+      <div className="markets-tabs">
+        {["All", "Perpetual", "Future"].map((type) => (
+          <button
+            key={type}
+            className={`markets-tab ${filter === type ? "active" : ""}`}
+            onClick={() => setFilter(type)}
+          >
+            {type === "Perpetual"
+              ? "Perps"
+              : type === "Future"
+              ? "Futures"
+              : type}
+          </button>
+        ))}
+      </div>
+
+      {/* Markets List */}
+      <div className="markets-list">
+        {filteredAndSearchedMarkets.map((market) => {
+          const isSelected = selectedMarket?.name === market.name;
+          const priceChange = priceChanges[market.name];
+          const isPositive = market.change24h > 0;
+
+          return (
+            <div
+              key={market.name}
+              className={`market-item ${isSelected ? "selected" : ""}`}
+              onClick={() => selectMarket(market.name)}
+            >
+              {/* Market Name as Main Heading */}
+              <div className="market-heading">
+                <span className="market-name">
                   {market.displayName || market.name}
-                  {market.status === "Deprecated" && (
-                    <span className="deprecated-badge-small">OLD</span>
-                  )}
-                </td>
-                <td
-                  className={`text-right market-price ${
-                    priceChanges[market.name]
-                      ? `price-flash-${priceChanges[market.name]}`
-                      : ""
-                  }`}
-                >
-                  ${formatPrice(market.markPrice || market.oraclePrice)}
-                  {priceChanges[market.name] && (
-                    <span
-                      className={`price-indicator price-indicator-${
-                        priceChanges[market.name]
-                      }`}
-                    >
-                      {priceChanges[market.name] === "up" ? "↑" : "↓"}
-                    </span>
-                  )}
-                </td>
-                <td
-                  className={`text-right ${
-                    market.change24h > 0 ? "text-green" : "text-red"
-                  }`}
-                >
+                </span>
+                {market.status === "Deprecated" && (
+                  <span className="market-badge-old">OLD</span>
+                )}
+                <span className="market-type-badge">{market.type}</span>
+              </div>
+
+              {/* Data Card */}
+              <div
+                className={`market-card ${
+                  priceChange ? `flash-${priceChange}` : ""
+                }`}
+              >
+                <div className="market-stat">
+                  <span className="market-stat-label">Price</span>
                   <span
-                    style={{
-                      display: "inline-flex",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
+                    className={`market-stat-value ${
+                      priceChange ? `price-${priceChange}` : ""
+                    }`}
                   >
-                    {market.change24h > 0 ? "▲" : "▼"}
+                    ${formatPrice(market.markPrice || market.oraclePrice)}
+                  </span>
+                </div>
+                <div className="market-stat">
+                  <span className="market-stat-label">24h Change</span>
+                  <span
+                    className={`market-stat-value ${
+                      isPositive ? "positive" : "negative"
+                    }`}
+                  >
                     {formatPercent(market.change24h)}
                   </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

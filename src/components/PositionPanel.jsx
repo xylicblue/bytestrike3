@@ -1,17 +1,17 @@
 // Component to display user's open positions
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
-import { toast } from 'react-hot-toast';
-import { useAllPositions, useClosePosition } from '../hooks/useClearingHouse';
-import { useMarkPrice } from '../hooks/useVAMM';
-import { SEPOLIA_CONTRACTS } from '../contracts/addresses';
-import './PositionPanel.css';
+import { useState } from "react";
+import { useAccount } from "wagmi";
+import { toast } from "react-hot-toast";
+import { useAllPositions, useClosePosition } from "../hooks/useClearingHouse";
+import { useMarkPrice } from "../hooks/useVAMM";
+import { SEPOLIA_CONTRACTS } from "../contracts/addresses";
+import "./PositionPanel.css";
 
 export function PositionPanel() {
   const { address, isConnected } = useAccount();
   const { positions, isLoading, error } = useAllPositions();
   const [closingPosition, setClosingPosition] = useState(null);
-  const [closeSize, setCloseSize] = useState('');
+  const [closeSize, setCloseSize] = useState("");
 
   if (!isConnected) {
     return (
@@ -52,7 +52,7 @@ export function PositionPanel() {
         <h3>Your Positions</h3>
         <div className="no-positions">
           <p>No open positions</p>
-          <span style={{ fontSize: '0.9rem', color: '#888' }}>
+          <span style={{ fontSize: "0.9rem", color: "#888" }}>
             Open a position to get started
           </span>
         </div>
@@ -79,7 +79,13 @@ export function PositionPanel() {
   );
 }
 
-function PositionCard({ position, closingPosition, setClosingPosition, closeSize, setCloseSize }) {
+function PositionCard({
+  position,
+  closingPosition,
+  setClosingPosition,
+  closeSize,
+  setCloseSize,
+}) {
   const isLong = position.isLong;
   const size = parseFloat(position.size);
   const absSize = Math.abs(size);
@@ -88,68 +94,77 @@ function PositionCard({ position, closingPosition, setClosingPosition, closeSize
   const realizedPnL = parseFloat(position.realizedPnL);
 
   // Get current mark price for this market's vAMM
-  const vammAddress = position.marketName === 'ETH-PERP-V2'
-    ? SEPOLIA_CONTRACTS.vammProxy
-    : SEPOLIA_CONTRACTS.vammProxyOld;
+  const vammAddress =
+    position.marketName === "ETH-PERP-V2"
+      ? SEPOLIA_CONTRACTS.vammProxy
+      : SEPOLIA_CONTRACTS.vammProxyOld;
 
-  const { markPrice } = useMarkPrice(vammAddress);
+  const { price: markPrice } = useMarkPrice(vammAddress);
   const currentPrice = markPrice ? parseFloat(markPrice) : 0;
 
   // Calculate current PnL
   const openNotional = entryPrice * absSize;
-  const currentPnL = currentPrice > 0
-    ? isLong
-      ? (currentPrice - entryPrice) * absSize
-      : (entryPrice - currentPrice) * absSize
-    : 0;
+  const currentPnL =
+    currentPrice > 0
+      ? isLong
+        ? (currentPrice - entryPrice) * absSize
+        : (entryPrice - currentPrice) * absSize
+      : 0;
 
   const pnlPercent = openNotional > 0 ? (currentPnL / openNotional) * 100 : 0;
   const isProfitable = currentPnL >= 0;
 
   // Close position hook
-  const { closePosition, isPending, isSuccess, hash } = useClosePosition(position.marketId);
+  const { closePosition, isPending, isSuccess, hash } = useClosePosition(
+    position.marketId
+  );
 
   const handleClose = (closeAmount) => {
     if (!closeAmount || parseFloat(closeAmount) <= 0) {
-      toast.error('Please enter a valid size to close');
+      toast.error("Please enter a valid size to close");
       return;
     }
 
     if (parseFloat(closeAmount) > absSize) {
-      toast.error(`Cannot close more than position size (${absSize.toFixed(4)})`);
+      toast.error(
+        `Cannot close more than position size (${absSize.toFixed(4)})`
+      );
       return;
     }
 
     try {
       closePosition(closeAmount, 0); // 0 = market price
-      toast.loading('Closing position...', { id: 'close' });
+      toast.loading("Closing position...", { id: "close" });
       setClosingPosition(null);
-      setCloseSize('');
+      setCloseSize("");
     } catch (error) {
-      console.error('Close position error:', error);
-      toast.error('Failed to close position: ' + error.message);
+      console.error("Close position error:", error);
+      toast.error("Failed to close position: " + error.message);
     }
   };
 
   if (isSuccess) {
-    toast.success('Position closed successfully!', { id: 'close' });
+    toast.success("Position closed successfully!", { id: "close" });
   }
 
   const isClosing = closingPosition === position.marketId;
 
   return (
-    <div className={`position-card ${isLong ? 'long' : 'short'}`}>
+    <div className={`position-card ${isLong ? "long" : "short"}`}>
       <div className="position-header">
         <div className="position-market">
           <span className="market-name">{position.marketName}</span>
-          <span className={`position-side ${isLong ? 'long-badge' : 'short-badge'}`}>
-            {isLong ? 'LONG' : 'SHORT'} {absSize.toFixed(4)}
+          <span
+            className={`position-side ${isLong ? "long-badge" : "short-badge"}`}
+          >
+            {isLong ? "LONG" : "SHORT"} {absSize.toFixed(4)}
           </span>
         </div>
-        <div className={`position-pnl ${isProfitable ? 'profit' : 'loss'}`}>
-          {isProfitable ? '+' : ''}${currentPnL.toFixed(2)}
+        <div className={`position-pnl ${isProfitable ? "profit" : "loss"}`}>
+          {isProfitable ? "+" : ""}${currentPnL.toFixed(2)}
           <span className="pnl-percent">
-            ({isProfitable ? '+' : ''}{pnlPercent.toFixed(2)}%)
+            ({isProfitable ? "+" : ""}
+            {pnlPercent.toFixed(2)}%)
           </span>
         </div>
       </div>
@@ -162,7 +177,7 @@ function PositionCard({ position, closingPosition, setClosingPosition, closeSize
         <div className="detail-row">
           <span className="label">Mark Price:</span>
           <span className="value">
-            ${currentPrice > 0 ? currentPrice.toFixed(2) : 'Loading...'}
+            ${currentPrice > 0 ? currentPrice.toFixed(2) : "Loading..."}
           </span>
         </div>
         <div className="detail-row">
@@ -179,7 +194,7 @@ function PositionCard({ position, closingPosition, setClosingPosition, closeSize
         </div>
         <div className="detail-row">
           <span className="label">Realized PnL:</span>
-          <span className={`value ${realizedPnL >= 0 ? 'profit' : 'loss'}`}>
+          <span className={`value ${realizedPnL >= 0 ? "profit" : "loss"}`}>
             ${realizedPnL.toFixed(2)}
           </span>
         </div>
@@ -218,13 +233,13 @@ function PositionCard({ position, closingPosition, setClosingPosition, closeSize
               onClick={() => handleClose(closeSize)}
               disabled={isPending}
             >
-              {isPending ? 'Closing...' : 'Confirm Close'}
+              {isPending ? "Closing..." : "Confirm Close"}
             </button>
             <button
               className="cancel-close"
               onClick={() => {
                 setClosingPosition(null);
-                setCloseSize('');
+                setCloseSize("");
               }}
             >
               Cancel

@@ -8,6 +8,7 @@ import PriceIndexChart from "./chart";
 import { supabase } from "./creatclient";
 
 import AnimatedSection from "./animated";
+import Footer from "./components/Footer";
 import { motion, AnimatePresence } from "framer-motion";
 import "./about.css";
 import heroBackground from "./assets/bg.jpg";
@@ -785,11 +786,7 @@ const LandingPage = () => {
         </motion.section>
       </main>
 
-      <footer>
-        <AnimatedSection>
-          <p>© {new Date().getFullYear()} Byte Strike. All rights reserved.</p>
-        </AnimatedSection>
-      </footer>
+      <Footer />
     </>
   );
 };

@@ -27,6 +27,17 @@ const TradingPage = () => {
 
   return (
     <main className="trading-page-main">
+      {/* Testnet Banner */}
+      <div className="testnet-banner">
+        <div className="testnet-banner-content">
+          <span className="testnet-icon">🧪</span>
+          <span className="testnet-text">
+            <strong>Testnet Mode</strong> — You're trading with test tokens. No
+            real money is involved.
+          </span>
+        </div>
+      </div>
+
       <NetworkGuard>
         <MarketProvider>
           <TradingDashboard />

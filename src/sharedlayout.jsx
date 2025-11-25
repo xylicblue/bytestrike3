@@ -12,7 +12,7 @@ import Web3AuthHandler from "./web3auth";
 
 // Import Components
 import ProfileDropdown from "./dropdown";
-import AnimatedSection from "./animated";
+import Footer from "./components/Footer";
 import logoImage from "./assets/ByteStrikeLogoFinal.png";
 
 // We've moved the TradingHeader into this file
@@ -31,6 +31,14 @@ const TradingHeader = ({ session, profile, handleLogout }) => {
           <ul className="nav-links trading-nav-links">
             <li>
               <NavLink
+                to="/guide"
+                className={({ isActive }) => (isActive ? "active" : "")}
+              >
+                Guide
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
                 to="/trade"
                 className={({ isActive }) => (isActive ? "active" : "")}
               >
@@ -43,14 +51,6 @@ const TradingHeader = ({ session, profile, handleLogout }) => {
                 className={({ isActive }) => (isActive ? "active" : "")}
               >
                 Portfolio
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to="/guide"
-                className={({ isActive }) => (isActive ? "active" : "")}
-              >
-                Guide
               </NavLink>
             </li>
           </ul>
@@ -152,11 +152,7 @@ const SharedLayout = () => {
       {/* THIS IS THE KEY: Outlet renders the specific child page */}
       <Outlet />
 
-      <footer>
-        <AnimatedSection>
-          <p>© {new Date().getFullYear()} Byte Strike. All rights reserved.</p>
-        </AnimatedSection>
-      </footer>
+      <Footer />
     </div>
   );
 };

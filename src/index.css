@@ -17,12 +17,24 @@
  
 }
 
+html {
+    overflow-x: hidden;
+    overflow-y: auto;
+    width: 100%;
+    height: 100%;
+}
+
 body {
     font-family: 'Roboto', sans-serif;
     margin: 0;
     background-color: #ffffff;
     color: var(--dark-text);
     line-height: 1.7;
+    overflow-x: hidden;
+    overflow-y: visible;
+    width: 100%;
+    max-width: 100vw;
+    min-height: 100%;
 }
 
 header {
@@ -2242,4 +2254,412 @@ nav {
     gap: 3rem; 
 }
 
+/* === MOBILE RESPONSIVE STYLES === */
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    z-index: 1001;
+}
+
+.hamburger .bar {
+    width: 25px;
+    height: 3px;
+    background-color: #e2e8f0;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger.active .bar:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger.active .bar:nth-child(2) {
+    opacity: 0;
+}
+
+.hamburger.active .bar:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
+/* Tablet and Mobile Navigation */
+@media (max-width: 1024px) {
+    nav {
+        padding: 0 1rem;
+    }
+
+    .nav-links {
+        gap: 1.5rem;
+    }
+
+    .logo img {
+        height: 40px;
+    }
+}
+
+@media (max-width: 768px) {
+    .hamburger {
+        display: flex;
+    }
+
+    .nav-center-right {
+        position: fixed;
+        top: 0;
+        right: -100%;
+        width: 280px;
+        height: 100vh;
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        padding: 80px 2rem 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        transition: right 0.3s ease;
+        box-shadow: -5px 0 20px rgba(0, 0, 0, 0.1);
+        z-index: 1002;
+        overflow-y: auto;
+    }
+
+    .nav-center-right.active {
+        right: 0;
+    }
+
+    .nav-links {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        margin: 0;
+        width: 100%;
+        order: 1;
+    }
+
+    .nav-links li {
+        width: 100%;
+        display: block;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 1rem 0;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        font-size: 1rem;
+        color: var(--dark-text);
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+        color: var(--primary-color);
+    }
+
+    .auth-buttons {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 1rem;
+        order: 2;
+    }
+
+    .login-button,
+    .signup-button-primary {
+        width: 100%;
+        text-align: center;
+        padding: 0.8rem 1.5rem;
+        display: block;
+    }
+
+    .trading-nav-links {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    .trading-nav-links li {
+        display: block;
+        width: 100%;
+    }
+
+    .trading-nav-links a {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        text-align: left;
+        display: block;
+    }
+
+    /* Profile dropdown styles for mobile */
+    .profile-container {
+        width: 100%;
+    }
+
+    .profile-trigger {
+        width: 100%;
+        justify-content: flex-start;
+        padding: 0.8rem 1rem;
+        background: rgba(0, 123, 255, 0.1);
+        border-radius: 8px;
+    }
+
+    .profile-trigger-wrapper {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .wallet-icon-button {
+        width: 100%;
+        padding: 0.6rem;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 0.5rem 0;
+    }
+
+    nav {
+        padding: 0 0.75rem;
+    }
+
+    .logo img {
+        height: 35px;
+    }
+
+    .nav-center-right {
+        width: 100%;
+        right: -100%;
+        padding: 80px 1.5rem 2rem;
+    }
+}
+
+/* Trading page specific mobile menu styling */
+@media (max-width: 768px) {
+    .trading-page-container .nav-center-right {
+        background: rgba(13, 17, 23, 0.98);
+        backdrop-filter: blur(20px);
+    }
+
+    .trading-page-container .nav-links a {
+        color: #c9d1d9;
+        border-bottom-color: rgba(255, 255, 255, 0.1);
+    }
+
+    .trading-page-container .nav-links a:hover,
+    .trading-page-container .nav-links a.active {
+        color: #58a6ff;
+        background-color: rgba(88, 166, 255, 0.1);
+    }
+
+    .trading-page-container .hamburger .bar {
+        background-color: #e2e8f0;
+    }
+}
+
+/* === Professional Footer Styles === */
+.site-footer {
+    background: linear-gradient(180deg, #0d1117 0%, #161b22 100%);
+    border-top: 1px solid rgba(48, 54, 61, 0.6);
+    padding: 1.75rem 0 0;
+    margin-top: auto;
+    /* Fade-in animation on scroll */
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+}
+
+.site-footer.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.footer-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.footer-main {
+    display: grid;
+    grid-template-columns: 1.5fr 2fr;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.footer-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+}
+
+.footer-logo {
+    height: 32px;
+    width: auto;
+    object-fit: contain;
+}
+
+.footer-tagline {
+    font-size: 0.8rem;
+    color: #8b949e;
+    line-height: 1.5;
+    max-width: 280px;
+    margin: 0;
+}
+
+.footer-links {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+}
+
+.footer-column h4 {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #ffffff;
+    margin: 0 0 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.footer-column ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.375rem;
+}
+
+.footer-column ul li a {
+    font-size: 0.8rem;
+    color: #8b949e;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-column ul li a:hover {
+    color: #58a6ff;
+}
+
+.footer-socials {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.social-link {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: rgba(48, 54, 61, 0.5);
+    border: 1px solid rgba(48, 54, 61, 0.8);
+    border-radius: 6px;
+    color: #8b949e;
+    transition: all 0.2s ease;
+}
+
+.social-link svg {
+    width: 16px;
+    height: 16px;
+}
+
+.social-link:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: rgba(88, 166, 255, 0.4);
+    color: #58a6ff;
+    transform: translateY(-2px);
+}
+
+.footer-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 0;
+}
+
+.footer-bottom p {
+    font-size: 0.75rem;
+    color: #8b949e;
+    margin: 0;
+}
+
+.footer-legal {
+    display: flex;
+    gap: 1.25rem;
+}
+
+.footer-legal a {
+    font-size: 0.75rem;
+    color: #8b949e;
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-legal a:hover {
+    color: #58a6ff;
+}
+
+/* Footer Mobile Responsive */
+@media (max-width: 768px) {
+    .site-footer {
+        padding: 2rem 0 0;
+    }
+
+    .footer-main {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .footer-brand {
+        align-items: center;
+        text-align: center;
+    }
+
+    .footer-tagline {
+        max-width: 100%;
+    }
+
+    .footer-links {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .footer-column:last-child {
+        grid-column: 1 / -1;
+        align-items: center;
+    }
+
+    .footer-column:last-child h4 {
+        text-align: center;
+    }
+
+    .footer-socials {
+        justify-content: center;
+    }
+
+    .footer-bottom {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .footer-links {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .footer-column ul {
+        align-items: center;
+    }
+}
 

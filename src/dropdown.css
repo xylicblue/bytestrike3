@@ -597,3 +597,66 @@
   width: 18px;
   height: 18px;
 }
+
+/* === MOBILE RESPONSIVE STYLES === */
+
+@media (max-width: 768px) {
+  /* When inside mobile menu, make profile container full width */
+  .nav-center-right .profile-container {
+    width: 100%;
+    position: static;
+  }
+
+  .nav-center-right .profile-trigger-wrapper {
+    width: 100%;
+    border-radius: 8px;
+    flex-direction: column;
+    background-color: rgba(0, 123, 255, 0.1);
+    border: 1px solid rgba(0, 123, 255, 0.2);
+  }
+
+  .nav-center-right .profile-trigger {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 1rem;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .nav-center-right .wallet-icon-button {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding: 0.75rem 1rem;
+    justify-content: center;
+    align-self: auto;
+  }
+
+  /* Dropdown menu adjustments for mobile */
+  .nav-center-right .dropdown-menu {
+    position: static;
+    width: 100%;
+    margin-top: 1rem;
+    border-radius: 8px;
+  }
+
+  /* Make profile text larger on mobile */
+  .nav-center-right .profile-trigger span {
+    font-size: 1rem;
+  }
+
+  .nav-center-right .avatar {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .dropdown-menu {
+    width: 260px;
+  }
+
+  .nav-center-right .dropdown-menu {
+    width: 100%;
+  }
+}

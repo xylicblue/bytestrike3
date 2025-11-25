@@ -15,14 +15,6 @@ export const TradingDashboard = () => {
 
   return (
     <div className="trading-dashboard">
-      {/* Phantom Mode Pill */}
-      <div className="phantom-mode-pill">
-        <span className="phantom-icon">👻</span>
-        <span className="phantom-label">PHANTOM MODE</span>
-        <span className="phantom-divider">|</span>
-        <span className="phantom-status">Testnet</span>
-      </div>
-
       {/* --- Left Column: Markets and Wallet (Sticky) --- */}
       <div className="dashboard-markets">
         <div className="panel">
@@ -47,6 +39,13 @@ export const TradingDashboard = () => {
 
       {/* --- Right Column: Trading Panel (Sticky) --- */}
       <div className="dashboard-trade-panel">
+        {/* Phantom Mode Pill */}
+        <div className="phantom-mode-pill">
+          <span className="phantom-icon">👻</span>
+          <span className="phantom-label">PHANTOM MODE</span>
+          <span className="phantom-divider">|</span>
+          <span className="phantom-status">Testnet</span>
+        </div>
         <div className="panel">
           <TradingPanel selectedMarket={selectedMarket} />
         </div>
