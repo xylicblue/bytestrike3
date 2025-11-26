@@ -781,3 +781,50 @@
     font-size: 2.5rem;
   }
 }
+
+/* Alternative Faucets Collapsible */
+.alternative-faucets {
+  margin-top: 1.5rem;
+  border: 1px solid rgba(88, 166, 255, 0.2);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.alternative-faucets summary {
+  padding: 1rem 1.25rem;
+  background: rgba(88, 166, 255, 0.05);
+  color: #8b949e;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.alternative-faucets summary::-webkit-details-marker {
+  display: none;
+}
+
+.alternative-faucets summary::before {
+  content: "▶";
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+}
+
+.alternative-faucets[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.alternative-faucets summary:hover {
+  background: rgba(88, 166, 255, 0.1);
+  color: #c9d1d9;
+}
+
+.alternative-faucets .faucet-grid {
+  padding: 1rem;
+  margin: 0;
+}
+

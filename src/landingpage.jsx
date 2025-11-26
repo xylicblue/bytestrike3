@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-scroll";
 import Web3AuthHandler from "./web3auth";
-
+import toast from "react-hot-toast";
 import { Link as Routerlink, useNavigate } from "react-router-dom";
 import PriceIndexChart from "./chart";
 
@@ -270,12 +270,26 @@ const LandingPage = () => {
 
     try {
       const { error } = await supabase.from("interest_list").insert([formData]);
-      if (error) throw error;
-      alert("Thank you for your interest! We will keep you updated.");
+      if (error) {
+        // Check for duplicate email error
+        if (
+          error.code === "23505" ||
+          error.message.includes("duplicate") ||
+          error.message.includes("unique")
+        ) {
+          toast.success(
+            "This email is already registered! We'll keep you updated."
+          );
+          setFormData({ name: "", email: "", role: "", interest: "" });
+          return;
+        }
+        throw error;
+      }
+      toast.success("Thank you for your interest! We will keep you updated.");
       setFormData({ name: "", email: "", role: "", interest: "" });
     } catch (error) {
       console.error("Error submitting form:", error.message);
-      alert(`Sorry, there was an error: ${error.message}`);
+      toast.error(`Sorry, there was an error. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }

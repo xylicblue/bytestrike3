@@ -21,102 +21,6 @@ const WelcomeModal = ({ isOpen, onClose }) => {
 
   const steps = [
     {
-      title: "Get Sepolia ETH",
-      subtitle: "Gas Fees for Transactions",
-      icon: "⛽",
-      content: (
-        <>
-          <p className="welcome-intro">
-            You need Sepolia ETH to pay for transaction gas fees.
-          </p>
-
-          <div className="info-box blue">
-            <p>
-              <strong>Important:</strong> You only need ~$2 worth of ETH for all
-              transactions. This is NOT a payment - you'll get your money back
-              afterward. The ETH is simply to verify you're human and prevent
-              bot spam.
-            </p>
-          </div>
-
-          <div className="faucet-grid">
-            <div className="faucet-card">
-              <div className="faucet-header">
-                <span className="faucet-badge recommended">Recommended</span>
-                <h4>Alchemy Faucet</h4>
-              </div>
-              <p className="faucet-amount">0.5 ETH</p>
-              <p className="faucet-desc">Sign in with Alchemy (free account)</p>
-              <a
-                href="https://sepoliafaucet.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="faucet-link"
-              >
-                Get ETH →
-              </a>
-            </div>
-
-            <div className="faucet-card">
-              <div className="faucet-header">
-                <h4>Infura Faucet</h4>
-              </div>
-              <p className="faucet-amount">0.5 ETH</p>
-              <p className="faucet-desc">Requires Infura account</p>
-              <a
-                href="https://www.infura.io/faucet/sepolia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="faucet-link"
-              >
-                Get ETH →
-              </a>
-            </div>
-
-            <div className="faucet-card">
-              <div className="faucet-header">
-                <h4>QuickNode</h4>
-              </div>
-              <p className="faucet-amount">0.1 ETH</p>
-              <p className="faucet-desc">Connect wallet to request</p>
-              <a
-                href="https://faucet.quicknode.com/ethereum/sepolia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="faucet-link"
-              >
-                Get ETH →
-              </a>
-            </div>
-
-            <div className="faucet-card">
-              <div className="faucet-header">
-                <h4>Google Cloud</h4>
-              </div>
-              <p className="faucet-amount">0.05 ETH</p>
-              <p className="faucet-desc">Sign in with Google account</p>
-              <a
-                href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="faucet-link"
-              >
-                Get ETH →
-              </a>
-            </div>
-          </div>
-
-          <div className="info-box">
-            <span className="info-icon">💡</span>
-            <p>
-              Recommended amount: <strong>0.1-0.5 ETH</strong> (enough for
-              50-500 transactions)
-            </p>
-          </div>
-        </>
-      ),
-    },
-    {
       title: "Connect to ByteStrike",
       subtitle: "Link Your Wallet",
       icon: "🔗",
@@ -164,6 +68,91 @@ const WelcomeModal = ({ isOpen, onClose }) => {
               displayed with a green status indicator
             </p>
           </div>
+        </>
+      ),
+    },
+    {
+      title: "Get Sepolia ETH",
+      subtitle: "Gas Fees for Transactions",
+      icon: "💎",
+      content: (
+        <>
+          <p className="welcome-intro">
+            You need Sepolia ETH to pay for transaction gas fees. We've made it
+            easy for you!
+          </p>
+
+          <div className="mint-section">
+            <div className="mint-card">
+              <h3>Get Test ETH (Recommended)</h3>
+              <p>
+                Use the built-in <strong>"Get Test ETH"</strong> button in the
+                Collateral Manager panel
+              </p>
+
+              <div className="mint-steps">
+                <div className="mini-step">
+                  <span className="mini-number">1</span>
+                  <span>Find "Need Test ETH?" in the Collateral panel</span>
+                </div>
+                <div className="mini-step">
+                  <span className="mini-number">2</span>
+                  <span>Click "Get Test ETH" button</span>
+                </div>
+                <div className="mini-step">
+                  <span className="mini-number">3</span>
+                  <span>Receive 0.04 ETH automatically!</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="info-box success">
+            <p>
+              <strong>No external faucets needed!</strong> ByteStrike provides
+              free test ETH directly. You can request once every 24 hours if
+              your balance is below 0.05 ETH.
+            </p>
+          </div>
+
+          <details className="alternative-faucets">
+            <summary>Alternative: External Faucets (if needed)</summary>
+            <div className="faucet-grid">
+              <div className="faucet-card">
+                <div className="faucet-header">
+                  <h4>Alchemy Faucet</h4>
+                </div>
+                <p className="faucet-amount">0.5 ETH</p>
+                <p className="faucet-desc">
+                  Sign in with Alchemy (free account)
+                </p>
+                <a
+                  href="https://sepoliafaucet.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="faucet-link"
+                >
+                  Get ETH →
+                </a>
+              </div>
+
+              <div className="faucet-card">
+                <div className="faucet-header">
+                  <h4>Google Cloud</h4>
+                </div>
+                <p className="faucet-amount">0.05 ETH</p>
+                <p className="faucet-desc">Sign in with Google account</p>
+                <a
+                  href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="faucet-link"
+                >
+                  Get ETH →
+                </a>
+              </div>
+            </div>
+          </details>
         </>
       ),
     },

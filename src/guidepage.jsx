@@ -29,7 +29,7 @@ const GuidePage = () => {
       }
 
       // Update active section based on scroll position
-      const sections = ["setup", "eth", "connect", "usdc", "deposit", "trade"];
+      const sections = ["setup", "connect", "eth", "usdc", "deposit", "trade"];
       const scrollPosition = window.pageYOffset + 150;
 
       for (let i = sections.length - 1; i >= 0; i--) {
@@ -95,26 +95,26 @@ const GuidePage = () => {
             <div className="connector-line"></div>
             <button
               className={`sidebar-item ${
-                activeSection === "eth" ? "active" : ""
-              }`}
-              onClick={() => scrollToSection("eth")}
-            >
-              <div className="bubble">
-                <div className="bubble-inner">2</div>
-              </div>
-              <span className="sidebar-label">Get ETH</span>
-            </button>
-            <div className="connector-line"></div>
-            <button
-              className={`sidebar-item ${
                 activeSection === "connect" ? "active" : ""
               }`}
               onClick={() => scrollToSection("connect")}
             >
               <div className="bubble">
-                <div className="bubble-inner">3</div>
+                <div className="bubble-inner">2</div>
               </div>
               <span className="sidebar-label">Connect</span>
+            </button>
+            <div className="connector-line"></div>
+            <button
+              className={`sidebar-item ${
+                activeSection === "eth" ? "active" : ""
+              }`}
+              onClick={() => scrollToSection("eth")}
+            >
+              <div className="bubble">
+                <div className="bubble-inner">3</div>
+              </div>
+              <span className="sidebar-label">Get ETH</span>
             </button>
             <div className="connector-line"></div>
             <button
@@ -196,142 +196,28 @@ const GuidePage = () => {
             <div className="content-card">
               <h3>
                 <span className="step-number">2</span>
-                Mainnet ETH Requirement
+                That's It!
               </h3>
               <p>
-                Most Sepolia faucets require proof of mainnet activity to
-                prevent spam.
+                ByteStrike provides everything else you need - including free
+                test ETH and test USDC tokens.
               </p>
-              <div className="requirement-box">
-                <div className="req-item">
-                  <span className="req-icon">✓</span>
-                  <span>~$5 worth of ETH on Ethereum Mainnet</span>
-                </div>
-                <div className="req-item">
-                  <span className="req-icon">✓</span>
-                  <span>0.001 ETH balance verification</span>
-                </div>
-              </div>
-              <div className="info-box">
+              <div className="info-box green">
                 <div>
                   <p>
-                    <strong>Options if you don't have mainnet ETH:</strong>
+                    <strong>No mainnet ETH required!</strong> Unlike other
+                    testnet platforms, ByteStrike has a built-in faucet that
+                    provides free Sepolia ETH directly.
                   </p>
-                  <ul>
-                    <li>
-                      Purchase small amount (~$5-10) from exchange (Coinbase,
-                      Binance)
-                    </li>
-                    <li>Receive from a friend</li>
-                    <li>
-                      Use faucets that don't require mainnet balance (limited
-                      options)
-                    </li>
-                  </ul>
                 </div>
               </div>
             </div>
           </section>
 
-          {/* Get Sepolia ETH */}
-          <section id="eth" className="guide-section">
-            <div className="section-header">
-              <h2>Step 1: Get Sepolia ETH</h2>
-              <div className="section-divider"></div>
-            </div>
-
-            <p className="section-intro">
-              You need Sepolia ETH to pay for transaction gas fees. Choose one
-              of these recommended faucets:
-            </p>
-
-            <div className="info-box blue">
-              <p>
-                <strong>Important:</strong> You only need ~$2 worth of ETH for
-                all transactions. This is NOT a payment - you'll get your money
-                back afterward. The ETH requirement is simply to verify you're
-                human and prevent bot spam, not for gas fees.
-              </p>
-            </div>
-
-            <div className="faucets-grid">
-              <div className="faucet-card-detail recommended">
-                <div className="faucet-badge">Recommended</div>
-                <h4>Alchemy Faucet</h4>
-                <div className="faucet-amount">0.5 ETH</div>
-                <p>Requires Alchemy account (free to create)</p>
-                <ol className="faucet-steps">
-                  <li>Go to sepoliafaucet.com</li>
-                  <li>Sign in with Alchemy</li>
-                  <li>Paste your wallet address</li>
-                  <li>Click "Send Me ETH"</li>
-                  <li>Receive 0.5 ETH (~30 seconds)</li>
-                </ol>
-                <a
-                  href="https://sepoliafaucet.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="faucet-btn primary"
-                >
-                  Get ETH from Alchemy →
-                </a>
-              </div>
-
-              <div className="faucet-card-detail">
-                <h4>Infura Faucet</h4>
-                <div className="faucet-amount">0.5 ETH</div>
-                <p>Requires Infura account</p>
-                <a
-                  href="https://www.infura.io/faucet/sepolia"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="faucet-btn"
-                >
-                  Get ETH from Infura →
-                </a>
-              </div>
-
-              <div className="faucet-card-detail">
-                <h4>QuickNode Faucet</h4>
-                <div className="faucet-amount">0.1 ETH</div>
-                <p>Connect wallet to request</p>
-                <a
-                  href="https://faucet.quicknode.com/ethereum/sepolia"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="faucet-btn"
-                >
-                  Get ETH from QuickNode →
-                </a>
-              </div>
-
-              <div className="faucet-card-detail">
-                <h4>Google Cloud Faucet</h4>
-                <div className="faucet-amount">0.05 ETH</div>
-                <p>Sign in with Google account</p>
-                <a
-                  href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="faucet-btn"
-                >
-                  Get ETH from Google →
-                </a>
-              </div>
-            </div>
-
-            <div className="info-box green">
-              <p>
-                <strong>Recommended amount:</strong> 0.1-0.5 ETH (enough for
-                50-500 transactions)
-              </p>
-            </div>
-          </section>
-
-          {/* Connect to ByteStrike */}
+          {/* Connect to ByteStrike - Now Step 1 */}
           <section id="connect" className="guide-section">
             <div className="section-header">
-              <h2>Step 2: Connect to ByteStrike</h2>
+              <h2>Step 1: Connect to ByteStrike</h2>
               <div className="section-divider"></div>
             </div>
 
@@ -401,6 +287,91 @@ const GuidePage = () => {
                   <span className="code-value">
                     https://sepolia.etherscan.io
                   </span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* Get Sepolia ETH - Now Step 2 */}
+          <section id="eth" className="guide-section">
+            <div className="section-header">
+              <h2>Step 2: Get Sepolia ETH</h2>
+              <div className="section-divider"></div>
+            </div>
+
+            <p className="section-intro">
+              You need Sepolia ETH to pay for transaction gas fees. We've made
+              this easy with our built-in faucet!
+            </p>
+
+            <div className="content-card highlight">
+              <h3>
+                <span className="step-number">⛽</span>
+                Use ByteStrike's Built-in Faucet (Recommended)
+              </h3>
+              <p>
+                Get free test ETH directly from ByteStrike - no external
+                accounts needed!
+              </p>
+              <div className="steps-container">
+                <div className="mini-step">
+                  <span className="mini-number">1</span>
+                  <span>
+                    Find "Need Test ETH?" in the Collateral Manager panel
+                  </span>
+                </div>
+                <div className="mini-step">
+                  <span className="mini-number">2</span>
+                  <span>Click the "Get Test ETH" button</span>
+                </div>
+                <div className="mini-step">
+                  <span className="mini-number">3</span>
+                  <span>Receive 0.04 ETH automatically (~30 seconds)</span>
+                </div>
+              </div>
+              <div className="info-box green">
+                <p>
+                  <strong>Rate Limits:</strong> You can request once every 24
+                  hours if your balance is below 0.05 ETH. This is enough for
+                  many transactions!
+                </p>
+              </div>
+            </div>
+
+            <div className="content-card">
+              <h3>Alternative: External Faucets</h3>
+              <p>
+                If you need more ETH or prefer external sources, you can use
+                these faucets:
+              </p>
+
+              <div className="faucets-grid">
+                <div className="faucet-card-detail">
+                  <h4>Alchemy Faucet</h4>
+                  <div className="faucet-amount">0.5 ETH</div>
+                  <p>Requires Alchemy account (free to create)</p>
+                  <a
+                    href="https://sepoliafaucet.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="faucet-btn"
+                  >
+                    Get ETH from Alchemy →
+                  </a>
+                </div>
+
+                <div className="faucet-card-detail">
+                  <h4>Google Cloud Faucet</h4>
+                  <div className="faucet-amount">0.05 ETH</div>
+                  <p>Sign in with Google account</p>
+                  <a
+                    href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="faucet-btn"
+                  >
+                    Get ETH from Google →
+                  </a>
                 </div>
               </div>
             </div>

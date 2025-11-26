@@ -6,7 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
-
+FRONTEND_INTEGRATION.md
 tailwind.config.js
 tsconfig.json
 tsconfig.js

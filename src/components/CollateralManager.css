@@ -422,6 +422,107 @@
   font-size: 13px;
 }
 
+/* Faucet Section Styles */
+.faucet-section {
+  background: linear-gradient(135deg, rgba(56, 139, 253, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  border: 1px solid rgba(88, 166, 255, 0.3);
+  border-radius: 8px;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Faucet tooltip - position centered and constrained */
+.faucet-section .info-tooltip {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 220px;
+  max-width: calc(100vw - 40px);
+}
+
+.faucet-section .info-icon-wrapper:hover .info-tooltip {
+  transform: translateX(-50%);
+}
+
+.faucet-section .info-tooltip::before {
+  right: auto;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.faucet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.faucet-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c9d1d9;
+}
+
+.eth-balance {
+  font-size: 12px;
+  font-weight: 600;
+  color: #58a6ff;
+  font-family: 'Courier New', monospace;
+}
+
+.faucet-button {
+  width: 100%;
+  padding: 0.6rem;
+  background: linear-gradient(135deg, #388bfd 0%, #8b5cf6 100%);
+  border: none;
+  border-radius: 20px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.faucet-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+}
+
+.faucet-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.faucet-icon {
+  font-size: 14px;
+}
+
+.faucet-button .spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.faucet-tx {
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+  background: rgba(88, 166, 255, 0.1);
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .collateral-manager {

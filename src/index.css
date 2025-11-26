@@ -2515,8 +2515,18 @@ nav {
 
 .footer-links {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
+}
+
+.footer-connect {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.footer-connect .footer-socials {
+    margin-top: 0;
 }
 
 .footer-column h4 {
@@ -2632,17 +2642,12 @@ nav {
         gap: 1.5rem;
     }
 
-    .footer-column:last-child {
-        grid-column: 1 / -1;
-        align-items: center;
-    }
-
-    .footer-column:last-child h4 {
-        text-align: center;
+    .footer-connect {
+        align-items: flex-start;
     }
 
     .footer-socials {
-        justify-content: center;
+        justify-content: flex-start;
     }
 
     .footer-bottom {

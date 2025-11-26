@@ -5,12 +5,16 @@ import {
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
+  useBalance,
 } from "wagmi";
 import { parseUnits, formatUnits } from "ethers";
 import { toast } from "react-hot-toast";
 import { SEPOLIA_CONTRACTS, COLLATERAL_TOKENS } from "../contracts/addresses";
 import { useDeposit, useWithdraw } from "../hooks/useClearingHouse";
 import "./CollateralManager.css";
+
+const FAUCET_API_URL =
+  "https://bytestrike-faucet-bot-production-1fc7.up.railway.app";
 
 const ERC20_ABI = [
   {
@@ -47,6 +51,19 @@ export function CollateralManager() {
   const [selectedToken, setSelectedToken] = useState(COLLATERAL_TOKENS[0]); // Default to mUSDC
   const [amount, setAmount] = useState("");
   const [isDepositing, setIsDepositing] = useState(true);
+
+  // Faucet state
+  const [isFaucetLoading, setIsFaucetLoading] = useState(false);
+  const [faucetTxHash, setFaucetTxHash] = useState("");
+
+  // Get ETH balance for faucet eligibility check
+  const { data: ethBalance, refetch: refetchEthBalance } = useBalance({
+    address: address,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000,
+    },
+  });
 
   // Approval state
   const {
@@ -175,6 +192,47 @@ export function CollateralManager() {
     }
   };
 
+  // Handle faucet request for test ETH
+  const handleFaucetRequest = async () => {
+    if (!address) {
+      toast.error("Please connect your wallet first");
+      return;
+    }
+
+    setIsFaucetLoading(true);
+    setFaucetTxHash("");
+
+    try {
+      const response = await fetch(`${FAUCET_API_URL}/request`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          walletAddress: address,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        toast.success(`🎉 Success! Sent ${data.amount} ETH to your wallet`, {
+          id: "faucet",
+        });
+        setFaucetTxHash(data.txHash);
+        // Refetch ETH balance after successful faucet
+        setTimeout(() => refetchEthBalance(), 3000);
+      } else {
+        toast.error(data.error || "Failed to get test ETH", { id: "faucet" });
+      }
+    } catch (error) {
+      console.error("Faucet error:", error);
+      toast.error("Network error. Please try again.", { id: "faucet" });
+    } finally {
+      setIsFaucetLoading(false);
+    }
+  };
+
   // Handle transaction success with useEffect to avoid infinite re-renders
   useEffect(() => {
     if (isApproveSuccess) {
@@ -227,6 +285,59 @@ export function CollateralManager() {
             Withdraw
           </button>
         </div>
+      </div>
+
+      {/* Faucet Section - Get Test ETH */}
+      <div className="faucet-section">
+        <div className="faucet-header">
+          <div className="label-with-info">
+            <span className="faucet-label">Need Test ETH?</span>
+            <div className="info-icon-wrapper">
+              <span className="info-icon">ⓘ</span>
+              <div className="info-tooltip">
+                <div className="tooltip-title">Get Free Test ETH</div>
+                <div className="tooltip-text">
+                  New to ByteStrike? Get free Sepolia ETH to pay for gas fees.
+                  You can request 0.04 ETH once every 24 hours if your balance
+                  is below 0.05 ETH.
+                </div>
+              </div>
+            </div>
+          </div>
+          {ethBalance && (
+            <span className="eth-balance">
+              {parseFloat(ethBalance.formatted).toFixed(4)} ETH
+            </span>
+          )}
+        </div>
+        <button
+          className="faucet-button"
+          onClick={handleFaucetRequest}
+          disabled={isFaucetLoading}
+        >
+          {isFaucetLoading ? (
+            <>
+              <span className="spinner"></span>
+              Requesting...
+            </>
+          ) : (
+            <>
+              {/* <span className="faucet-icon">⛽</span> */}
+              Get Test ETH
+            </>
+          )}
+        </button>
+        {faucetTxHash && (
+          <div className="tx-link faucet-tx">
+            <a
+              href={`https://sepolia.etherscan.io/tx/${faucetTxHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View faucet tx on Etherscan →
+            </a>
+          </div>
+        )}
       </div>
 
       <div className="token-selector">
