@@ -7,17 +7,17 @@ import ClearingHouseABI from '../contracts/abis/ClearingHouse.json';
 const SEPOLIA_CHAIN_ID = 11155111;
 const MARKET_POSITION_CONFIG = [
   {
-    key: 'H100-GPU-PERP',
-    marketId: MARKET_IDS['H100-GPU-PERP'],
-    vammAddress: SEPOLIA_CONTRACTS.vammProxy,
-    displayName: 'ByteStrike • H100 GPU',
+    key: 'H100-PERP',
+    marketId: MARKET_IDS['H100-PERP'],
+    vammAddress: SEPOLIA_CONTRACTS.vammProxy, // ⭐ Active vAMM ($3.79/hour)
+    displayName: 'H100 GPU ($3.79/hr)',
     baseAssetSymbol: 'GPU-HRS',
   },
   {
-    key: 'ETH-PERP-V2',
-    marketId: MARKET_IDS['ETH-PERP-V2'],
-    vammAddress: SEPOLIA_CONTRACTS.vammProxyOld,
-    displayName: 'Legacy ETH ($3.75)',
+    key: 'ETH-PERP',
+    marketId: MARKET_IDS['ETH-PERP'],
+    vammAddress: SEPOLIA_CONTRACTS.vammProxyOld, // Deprecated test market
+    displayName: 'Test Market (Deprecated)',
     baseAssetSymbol: 'ETH',
   },
 ];
