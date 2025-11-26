@@ -78,7 +78,7 @@ export const TradingPanel = ({ selectedMarket }) => {
   const [priceLimit, setPriceLimit] = useState("");
 
   // Get market ID from market name
-  const marketId = MARKET_IDS[selectedMarket] || MARKET_IDS["ETH-PERP-V2"];
+  const marketId = MARKET_IDS[selectedMarket] || MARKET_IDS["H100-PERP"];
 
   // Get account value
   const { accountValue, isLoading: isLoadingAccount } = useAccountValue();
@@ -176,8 +176,22 @@ export const TradingPanel = ({ selectedMarket }) => {
   const sellLabel = "Sell GPU Hours (Short)";
 
   const handleSizeButtonClick = (percentage) => {
-    const simulatedTotal = 2.5;
-    setSize((simulatedTotal * (percentage / 100)).toFixed(4));
+    // Calculate max position size based on account value and IMR
+    // accountValue is in USD, current price is in $/hour
+    const accountValueNum = parseFloat(accountValue) || 0;
+    const currentPrice = parseFloat(market?.markPriceRaw) || 3.79;
+    const imr = riskParams?.imr || 0.1; // Default 10% IMR
+
+    // Max position size = (Account Value / Price) / IMR
+    // This represents max GPU hours you can buy with your collateral
+    const maxPositionSize = accountValueNum > 0
+      ? (accountValueNum / currentPrice) / imr
+      : 0;
+
+    // Calculate size for the selected percentage
+    const calculatedSize = maxPositionSize * (percentage / 100);
+
+    setSize(calculatedSize > 0 ? calculatedSize.toFixed(4) : "");
   };
 
   // Handle trade execution
@@ -504,14 +518,14 @@ export const TradingPanel = ({ selectedMarket }) => {
           <div className="size-slider-section">
             <div className="size-slider-header">
               <span className="size-slider-label">Quick Size</span>
-              <span className="size-slider-hint">% of available balance</span>
+              <span className="size-slider-hint">% of max GPU hours (based on collateral)</span>
             </div>
             <div className="size-slider">
               {[25, 50, 75, 100].map((p) => (
                 <button
                   key={p}
                   onClick={() => handleSizeButtonClick(p)}
-                  title={`Use ${p}% of available balance`}
+                  title={`Use ${p}% of max position size (GPU hours you can buy with your collateral)`}
                 >
                   {p}%
                 </button>

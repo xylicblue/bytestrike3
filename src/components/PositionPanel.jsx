@@ -94,10 +94,11 @@ function PositionCard({
   const realizedPnL = parseFloat(position.realizedPnL);
 
   // Get current mark price for this market's vAMM
-  const vammAddress =
-    position.marketName === "ETH-PERP-V2"
+  // Use the vammAddress directly from the position data, or determine from marketKey
+  const vammAddress = position.vammAddress ||
+    (position.marketKey === "H100-PERP" || position.marketKey === "ETH-PERP-V2"
       ? SEPOLIA_CONTRACTS.vammProxy
-      : SEPOLIA_CONTRACTS.vammProxyOld;
+      : SEPOLIA_CONTRACTS.vammProxyOld);
 
   const { price: markPrice } = useMarkPrice(vammAddress);
   const currentPrice = markPrice ? parseFloat(markPrice) : 0;
@@ -182,7 +183,7 @@ function PositionCard({
         </div>
         <div className="detail-row">
           <span className="label">Size:</span>
-          <span className="value">{absSize.toFixed(4)} ETH</span>
+          <span className="value">{absSize.toFixed(4)} {position.baseAssetSymbol || 'GPU-HRS'}</span>
         </div>
         <div className="detail-row">
           <span className="label">Notional:</span>

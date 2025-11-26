@@ -2,28 +2,39 @@
 import React, { createContext, useState, useContext } from "react";
 import { MARKET_IDS } from "./contracts/addresses";
 
-// Both markets are deployed on Sepolia testnet
+// Markets deployed on Sepolia testnet
 const AVAILABLE_MARKETS = {
+  "H100-PERP": {
+    name: "H100-PERP",
+    displayName: "H100 GPU ($3.79/hr)",
+    type: "Perpetual",
+    baseAsset: "GPU-HOURS",
+    quoteAsset: "USDC",
+    marketId: MARKET_IDS['H100-PERP'],
+    description: "H100 GPU hourly rental rate perpetual futures",
+  },
   "ETH-PERP-V2": {
     name: "ETH-PERP-V2",
-    displayName: "ETH-PERP ($3.75)",
+    displayName: "H100 GPU ($3.79/hr)",
     type: "Perpetual",
-    baseAsset: "ETH",
+    baseAsset: "GPU-HOURS",
     quoteAsset: "USDC",
-    marketId: MARKET_IDS['ETH-PERP-V2'],
+    marketId: MARKET_IDS['ETH-PERP-V2'], // Alias for H100-PERP
+    description: "Alias for H100-PERP market",
   },
   "ETH-PERP": {
     name: "ETH-PERP",
-    displayName: "ETH-PERP ($2000) [OLD]",
+    displayName: "Test Market (Deprecated)",
     type: "Perpetual",
     baseAsset: "ETH",
     quoteAsset: "USDC",
     marketId: MARKET_IDS['ETH-PERP'],
+    description: "Deprecated test market",
   },
 };
 
-// Default to the new market with $3.75 price
-const DEFAULT_MARKET = AVAILABLE_MARKETS["ETH-PERP-V2"];
+// Default to the H100 GPU market
+const DEFAULT_MARKET = AVAILABLE_MARKETS["H100-PERP"];
 
 // 1. Create the context
 const MarketContext = createContext();

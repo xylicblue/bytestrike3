@@ -19,11 +19,13 @@ export const SEPOLIA_CONTRACTS = {
   feeRouter: '0xa75839A6D2Bb2f47FE98dc81EC47eaD01D4A2c1F', // Active
 
   // Oracles
-  oracle: '0x3cA2Da03e4b6dB8fe5a24c22Cf5EB2A34B59cbad', // Chainlink oracle (unused)
-  cuOracle: '0x7d1cc77Cb9C0a30a9aBB3d052A5542aB5E254c9c', // Custom oracle (unused)
-  simpleETHOracle: '0x5d57118594a8b1C3Aa3dbA1f0A18a6744f531096', // Simple ETH oracle (deprecated)
-  updatableETHOracle: '0xC6Cb27fE8Bc7F936acD718dfd1D6E0592F69A028', // Updatable ETH oracle ⭐ ACTIVE
-  cuOracleAdapter: '0xC6Cb27fE8Bc7F936acD718dfd1D6E0592F69A028', // Alias for frontend compatibility
+  indexOracle: '0x3cA2Da03e4b6dB8fe5a24c22Cf5EB2A34B59cbad', // ⭐ ACTIVE: H100 GPU rental price oracle ($3.79/hour)
+  oracle: '0x3cA2Da03e4b6dB8fe5a24c22Cf5EB2A34B59cbad', // Alias for index oracle
+  collateralOracle: '0x7d1cc77Cb9C0a30a9aBB3d052A5542aB5E254c9c', // ⭐ ACTIVE: USDC price oracle for CollateralVault ($1.00)
+
+  // Deprecated oracles (for reference)
+  simpleETHOracle: '0x5d57118594a8b1C3Aa3dbA1f0A18a6744f531096', // Deprecated
+  updatableETHOracle: '0xC6Cb27fE8Bc7F936acD718dfd1D6E0592F69A028', // Deprecated
 
   // Mock Tokens (for testing)
   mockUSDC: '0x8C68933688f94BF115ad2F9C8c8e251AE5d4ade7', // Active
@@ -33,12 +35,13 @@ export const SEPOLIA_CONTRACTS = {
 
 // Market IDs (keccak256 of market parameters)
 export const MARKET_IDS = {
-  'ETH-PERP-V2': '0x923fe13dd90eff0f2f8b82db89ef27daef5f899aca7fba59ebb0b01a6343bfb5', // Active ⭐
-  'ETH-PERP': '0x352291f10e3a0d4a9f7beb3b623eac0b06f735c95170f956bc68b2f8b504a35d', // Deprecated
+  'H100-PERP': '0x923fe13dd90eff0f2f8b82db89ef27daef5f899aca7fba59ebb0b01a6343bfb5', // ⭐ ACTIVE: H100 GPU perpetual ($3.79/hour)
+  'ETH-PERP-V2': '0x923fe13dd90eff0f2f8b82db89ef27daef5f899aca7fba59ebb0b01a6343bfb5', // Alias (same as H100-PERP)
+  'ETH-PERP': '0x352291f10e3a0d4a9f7beb3b623eac0b06f735c95170f956bc68b2f8b504a35d', // Deprecated test market
 };
 
 // Default market to use in the frontend
-export const DEFAULT_MARKET_ID = MARKET_IDS['ETH-PERP-V2']; // Active market with $3.75 ETH
+export const DEFAULT_MARKET_ID = MARKET_IDS['H100-PERP']; // Active market: H100 GPU rental @ $3.79/hour
 
 // Implementation Contracts (for reference)
 export const IMPLEMENTATIONS = {
@@ -67,18 +70,20 @@ export const COLLATERAL_TOKENS = [
 
 // Market Configuration
 export const MARKETS = {
-  'ETH-PERP-V2': {
-    id: MARKET_IDS['ETH-PERP-V2'],
-    name: 'ETH-PERP-V2',
-    baseAsset: 'ETH',
-    quoteAsset: 'USDC',
+  'H100-PERP': {
+    id: MARKET_IDS['H100-PERP'],
+    name: 'H100-PERP',
+    displayName: 'H100 GPU Perpetual',
+    baseAsset: 'GPU-HOURS', // Trading H100 GPU compute hours
+    quoteAsset: 'USDC',     // Collateral in USDC
     vamm: SEPOLIA_CONTRACTS.vammProxy,
-    oracle: SEPOLIA_CONTRACTS.simpleETHOracle,
-    indexPrice: 3.79, // Fixed index price from SimpleETHOracle
+    oracle: SEPOLIA_CONTRACTS.indexOracle, // H100 rental price oracle
+    indexPrice: 3.79, // Current H100 GPU rental rate ($/hour)
     feeBps: 100, // 1%
     imrBps: 1000, // 10%
     mmrBps: 500, // 5%
     active: true,
+    description: 'Perpetual futures on H100 GPU hourly rental rates',
   },
 };
 
