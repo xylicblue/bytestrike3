@@ -12,6 +12,7 @@ import {
   useOpenPosition,
   useAccountValue,
   useMarketRiskParams,
+  useVaultBalance,
 } from "./hooks/useClearingHouse";
 import { MARKET_IDS } from "./contracts/addresses";
 
@@ -89,8 +90,17 @@ export const TradingPanel = ({ selectedMarket }) => {
   // Get market ID from market name
   const marketId = MARKET_IDS[selectedMarket] || MARKET_IDS["H100-PERP"];
 
-  // Get account value
+  // Get account value (may fail if getAccountValue reverts)
   const { accountValue, isLoading: isLoadingAccount } = useAccountValue();
+
+  // Get vault balance as fallback
+  const { totalCollateralValue, usdcBalance, wethBalance } = useVaultBalance();
+
+  // Debug logging
+  console.log('[TradingPanel] accountValue:', accountValue);
+  console.log('[TradingPanel] totalCollateralValue:', totalCollateralValue);
+  console.log('[TradingPanel] usdcBalance:', usdcBalance);
+  console.log('[TradingPanel] wethBalance:', wethBalance);
 
   // Get market risk parameters
   const { riskParams, isLoading: isLoadingRiskParams } =
@@ -217,15 +227,18 @@ export const TradingPanel = ({ selectedMarket }) => {
 
   const handleSizeButtonClick = (percentage) => {
     // Calculate max position size based on account value and IMR
-    // accountValue is in USD, current price is in $/hour
+    // Use vault balance as fallback if accountValue is 0
     const accountValueNum = parseFloat(accountValue) || 0;
+    const vaultBalanceNum = parseFloat(totalCollateralValue) || 0;
+    const effectiveBalance = accountValueNum > 0 ? accountValueNum : vaultBalanceNum;
+
     const currentPrice = parseFloat(market?.markPriceRaw) || 3.79;
-    const imr = riskParams?.imr || 0.1; // Default 10% IMR
+    const imr = riskParams?.imrPercent ? riskParams.imrPercent / 100 : 0.1; // Convert % to decimal
 
     // Max position size = (Account Value / Price) / IMR
     // This represents max GPU hours you can buy with your collateral
     const maxPositionSize =
-      accountValueNum > 0 ? accountValueNum / currentPrice / imr : 0;
+      effectiveBalance > 0 ? effectiveBalance / currentPrice / imr : 0;
 
     // Calculate size for the selected percentage
     const calculatedSize = maxPositionSize * (percentage / 100);
@@ -586,11 +599,22 @@ export const TradingPanel = ({ selectedMarket }) => {
             <span>
               {isLoadingAccount
                 ? "Loading..."
-                : accountValue
-                ? `$${parseFloat(accountValue).toFixed(2)}`
-                : "$0.00"}
+                : (() => {
+                    const accountVal = parseFloat(accountValue) || 0;
+                    const vaultVal = parseFloat(totalCollateralValue) || 0;
+                    const displayValue = accountVal > 0 ? accountVal : vaultVal;
+                    return displayValue > 0 ? `$${displayValue.toFixed(2)}` : "$0.00";
+                  })()}
             </span>
           </div>
+
+          {/* Debug info - show vault balances */}
+          {parseFloat(totalCollateralValue) > 0 && (
+            <div style={{ fontSize: "0.75rem", color: "#888", marginTop: "8px" }}>
+              Vault: {parseFloat(usdcBalance).toFixed(2)} USDC
+              {parseFloat(wethBalance) > 0 && ` + ${parseFloat(wethBalance).toFixed(4)} WETH`}
+            </div>
+          )}
 
           <button
             className={`place-order-btn ${

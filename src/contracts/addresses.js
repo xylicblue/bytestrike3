@@ -10,8 +10,8 @@ export const SEPOLIA_CONTRACTS = {
   collateralVault: '0xfe2c9c2A1f0c700d88C78dCBc2E7bD1a8BB30DF0', // Active vault
 
   // vAMMs
-  vammProxy: '0x3f9b634b9f09e7F8e84348122c86d3C2324841b5', // Active vAMM ($3.75 ETH)
-  vammImpl: '0x2B83ca8210cCe6CB14Bc0cFdA2CDFD83021D743b', // vAMM implementation
+  vammProxy: '0xF7210ccC245323258CC15e0Ca094eBbe2DC2CD85', // ⭐ ACTIVE: H100-PERP vAMM ($3.79/hour, IMR 10%, MMR 5%)
+  vammImpl: '0xd64175cE957F089bA7fb3EBdA5B17f268DE01190', // vAMM implementation (latest)
   vammProxyOld: '0xF8908F7B4a1AaaD69bF0667FA83f85D3d0052739', // Old vAMM (deprecated)
 
   // Supporting Contracts
@@ -35,8 +35,8 @@ export const SEPOLIA_CONTRACTS = {
 
 // Market IDs (keccak256 of market parameters)
 export const MARKET_IDS = {
-  'H100-PERP': '0x923fe13dd90eff0f2f8b82db89ef27daef5f899aca7fba59ebb0b01a6343bfb5', // ⭐ ACTIVE: H100 GPU perpetual ($3.79/hour)
-  'ETH-PERP-V2': '0x923fe13dd90eff0f2f8b82db89ef27daef5f899aca7fba59ebb0b01a6343bfb5', // Alias (same as H100-PERP)
+  'H100-PERP': '0x2bc0c3f3ef82289c7da8a9335c83ea4f2b5b8bd62b67c4f4e0dba00b304c2937', // ⭐ ACTIVE: H100 GPU perpetual ($3.79/hour, IMR 10%, MMR 5%)
+  'ETH-PERP-V2': '0x385badc5603eb47056a6bdcd6ac81a50df49d7a4e8a7451405e580bd12087a28', // Deprecated
   'ETH-PERP': '0x352291f10e3a0d4a9f7beb3b623eac0b06f735c95170f956bc68b2f8b504a35d', // Deprecated test market
 };
 
@@ -79,11 +79,13 @@ export const MARKETS = {
     vamm: SEPOLIA_CONTRACTS.vammProxy,
     oracle: SEPOLIA_CONTRACTS.indexOracle, // H100 rental price oracle
     indexPrice: 3.79, // Current H100 GPU rental rate ($/hour)
-    feeBps: 100, // 1%
-    imrBps: 1000, // 10%
-    mmrBps: 500, // 5%
+    feeBps: 10, // 0.1% trading fee
+    imrBps: 1000, // 10% Initial Margin Requirement
+    mmrBps: 500, // 5% Maintenance Margin Requirement
+    liquidationPenaltyBps: 250, // 2.5% Liquidation Penalty
+    penaltyCap: 1000, // $1000 max penalty
     active: true,
-    description: 'Perpetual futures on H100 GPU hourly rental rates',
+    description: 'Perpetual futures on H100 GPU hourly rental rates with 10x max leverage',
   },
 };
 
@@ -97,6 +99,21 @@ export const CHAIN_CONFIG = {
 
 // Deployment History
 export const DEPLOYMENT_HISTORY = {
+  'h100-perp-2025-11-27': {
+    date: '2025-11-27',
+    description: 'New H100-PERP market with proper risk parameters',
+    vammProxy: '0xF7210ccC245323258CC15e0Ca094eBbe2DC2CD85',
+    vammImpl: '0xd64175cE957F089bA7fb3EBdA5B17f268DE01190',
+    marketId: '0x2bc0c3f3ef82289c7da8a9335c83ea4f2b5b8bd62b67c4f4e0dba00b304c2937',
+    changes: [
+      'Deployed new vAMM with $3.79/hour H100 GPU pricing',
+      'Set IMR to 10% (1000 bps) for 10x max leverage',
+      'Set MMR to 5% (500 bps)',
+      'Set liquidation penalty to 2.5% (250 bps) with $1000 cap',
+      'Trading fee: 0.1% (10 bps)',
+      'Connected to existing ClearingHouse, MarketRegistry, and CollateralVault',
+    ],
+  },
   v3: {
     date: '2025-01-21',
     description: 'Fixed FeeRouter notification with correct decimals',

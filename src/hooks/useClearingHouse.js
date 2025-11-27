@@ -1,8 +1,9 @@
 // Hooks for ClearingHouse contract interactions
 import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
 import { parseUnits, formatUnits } from 'ethers';
-import { SEPOLIA_CONTRACTS, MARKET_IDS } from '../contracts/addresses';
+import { SEPOLIA_CONTRACTS, MARKET_IDS, COLLATERAL_TOKENS } from '../contracts/addresses';
 import ClearingHouseABI from '../contracts/abis/ClearingHouse.json';
+import CollateralVaultABI from '../contracts/abis/CollateralVault.json';
 
 const SEPOLIA_CHAIN_ID = 11155111;
 const MARKET_POSITION_CONFIG = [
@@ -35,7 +36,7 @@ export function usePosition(marketId, userAddress = null) {
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
     functionName: 'getPosition',
-    args: [addressToUse, marketId],
+    args: [addressToUse, marketId], // ABI signature: (address account, bytes32 marketId)
     chainId: SEPOLIA_CHAIN_ID,
     query: {
       enabled: !!addressToUse && !!marketId,
@@ -122,7 +123,7 @@ export function useAccountValue(userAddress = null) {
   const { address: connectedAddress } = useAccount();
   const addressToUse = userAddress || connectedAddress;
 
-  const { data, isLoading } = useReadContract({
+  const { data, isLoading, refetch } = useReadContract({
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
     functionName: 'getAccountValue',
@@ -135,9 +136,10 @@ export function useAccountValue(userAddress = null) {
   });
 
   return {
-    accountValue: data ? formatUnits(data, 18) : '0',
+    accountValue: data !== undefined && data !== null ? formatUnits(data, 18) : '0',
     accountValueRaw: data,
     isLoading,
+    refetch,
   };
 }
 
@@ -373,5 +375,89 @@ export function useLiquidationStatus(marketId, userAddress = null) {
     maintenanceMargin: maintenanceData ? formatUnits(maintenanceData, 18) : '0',
     maintenanceMarginRaw: maintenanceData,
     isLoading: isChecking || isFetchingMargin,
+  };
+}
+
+/**
+ * Get user's vault balance directly from CollateralVault
+ * This is a fallback when getAccountValue fails
+ * @param {string} userAddress - User's wallet address
+ */
+export function useVaultBalance(userAddress = null) {
+  const { address: connectedAddress } = useAccount();
+  const addressToUse = userAddress || connectedAddress;
+
+  console.log('[useVaultBalance] Address:', addressToUse);
+  console.log('[useVaultBalance] Vault:', SEPOLIA_CONTRACTS.collateralVault);
+  console.log('[useVaultBalance] mUSDC:', SEPOLIA_CONTRACTS.mockUSDC);
+
+  // Get mUSDC balance (6 decimals)
+  const { data: usdcBalance, refetch: refetchUSDC, error: usdcError } = useReadContract({
+    address: SEPOLIA_CONTRACTS.collateralVault,
+    abi: CollateralVaultABI.abi,
+    functionName: 'balanceOf',
+    args: [addressToUse, SEPOLIA_CONTRACTS.mockUSDC],
+    chainId: SEPOLIA_CHAIN_ID,
+    query: {
+      enabled: !!addressToUse,
+      refetchInterval: 5000,
+    },
+  });
+
+  console.log('[useVaultBalance] mUSDC Balance Raw:', usdcBalance);
+  console.log('[useVaultBalance] mUSDC Error:', usdcError);
+
+  // Get mWETH balance (18 decimals)
+  const { data: wethBalance, refetch: refetchWETH } = useReadContract({
+    address: SEPOLIA_CONTRACTS.collateralVault,
+    abi: CollateralVaultABI.abi,
+    functionName: 'balanceOf',
+    args: [addressToUse, SEPOLIA_CONTRACTS.mockWETH],
+    chainId: SEPOLIA_CHAIN_ID,
+    query: {
+      enabled: !!addressToUse,
+      refetchInterval: 5000,
+    },
+  });
+
+  // Get total collateral value in USD (1e18)
+  const { data: totalCollateralValue, refetch: refetchTotal, error: totalError } = useReadContract({
+    address: SEPOLIA_CONTRACTS.collateralVault,
+    abi: CollateralVaultABI.abi,
+    functionName: 'getAccountCollateralValueX18',
+    args: [addressToUse],
+    chainId: SEPOLIA_CHAIN_ID,
+    query: {
+      enabled: !!addressToUse,
+      refetchInterval: 5000,
+    },
+  });
+
+  console.log('[useVaultBalance] Total Collateral Raw:', totalCollateralValue);
+  console.log('[useVaultBalance] Total Collateral Error:', totalError);
+
+  const refetchAll = () => {
+    refetchUSDC();
+    refetchWETH();
+    refetchTotal();
+  };
+
+  const formattedUSDC = usdcBalance !== undefined && usdcBalance !== null ? formatUnits(usdcBalance, 6) : '0';
+  const formattedWETH = wethBalance !== undefined && wethBalance !== null ? formatUnits(wethBalance, 18) : '0';
+  const formattedTotal = totalCollateralValue !== undefined && totalCollateralValue !== null
+    ? formatUnits(totalCollateralValue, 18)
+    : '0';
+
+  console.log('[useVaultBalance] Formatted USDC:', formattedUSDC);
+  console.log('[useVaultBalance] Formatted Total:', formattedTotal);
+
+  return {
+    usdcBalance: formattedUSDC,
+    usdcBalanceRaw: usdcBalance,
+    wethBalance: formattedWETH,
+    wethBalanceRaw: wethBalance,
+    totalCollateralValue: formattedTotal,
+    totalCollateralValueRaw: totalCollateralValue,
+    refetch: refetchAll,
   };
 }

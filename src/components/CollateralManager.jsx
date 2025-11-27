@@ -113,6 +113,18 @@ export function CollateralManager() {
     },
   });
 
+  // Check vault balance to verify deposits
+  const { data: vaultBalance, refetch: refetchVaultBalance } = useReadContract({
+    address: SEPOLIA_CONTRACTS.collateralVault,
+    abi: ERC20_ABI, // Just need balanceOf
+    functionName: "balanceOf",
+    args: [address, selectedToken.address],
+    query: {
+      enabled: !!address,
+      refetchInterval: 5000,
+    },
+  });
+
   // Format balances
   const formattedBalance = tokenBalance
     ? formatUnits(tokenBalance, selectedToken.decimals)
@@ -245,8 +257,12 @@ export function CollateralManager() {
     if (isDepositSuccess) {
       toast.success("Collateral deposited successfully!", { id: "deposit" });
       setAmount("");
+      // Force refetch balances after successful deposit
+      setTimeout(() => {
+        refetchVaultBalance();
+      }, 2000); // Wait 2s for blockchain confirmation
     }
-  }, [isDepositSuccess]);
+  }, [isDepositSuccess, refetchVaultBalance]);
 
   useEffect(() => {
     if (isWithdrawSuccess) {
@@ -380,6 +396,17 @@ export function CollateralManager() {
             {parseFloat(formattedBalance).toFixed(
               selectedToken.decimals === 6 ? 2 : 4
             )}{" "}
+            {selectedToken.symbol}
+          </span>
+        </div>
+        <div className="balance-row">
+          <span>Vault Balance:</span>
+          <span className="value">
+            {vaultBalance
+              ? parseFloat(formatUnits(vaultBalance, selectedToken.decimals)).toFixed(
+                  selectedToken.decimals === 6 ? 2 : 4
+                )
+              : "0.00"}{" "}
             {selectedToken.symbol}
           </span>
         </div>
