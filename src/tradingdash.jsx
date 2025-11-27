@@ -1,7 +1,7 @@
 // src/components/TradingDashboard.js
 import React from "react";
 import { Markets } from "./market";
-import PriceIndexChart from "./chart";
+import ChartToggle from "./components/ChartToggle";
 import { TradingPanel } from "./tradingpanel"; // Import the new TradingPanel
 import PositionPanel from "./components/PositionPanel"; // Import PositionPanel
 import WalletStatus from "./components/WalletStatus"; // Import WalletStatus
@@ -29,7 +29,7 @@ export const TradingDashboard = () => {
       {/* --- Center Column: Chart and Positions --- */}
       <div className="dashboard-main">
         <div className="panel" style={{ padding: "0.25rem" }}>
-          <PriceIndexChart />
+          <ChartToggle selectedMarket={selectedMarket} />
         </div>
         <div className="section-divider"></div>
         <div className="panel" style={{ marginTop: "1rem" }}>
