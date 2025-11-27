@@ -2,11 +2,17 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom";
 import { toast } from "react-hot-toast";
+import { useAccount } from "wagmi";
+import { supabase } from "./creatclient";
 import "./tradingpanel.css";
 import { useMarketRealTimeData } from "./marketData";
 import MintUSDC from "./components/MintUSDC";
 import CollateralManager from "./components/CollateralManager";
-import { useOpenPosition, useAccountValue, useMarketRiskParams } from "./hooks/useClearingHouse";
+import {
+  useOpenPosition,
+  useAccountValue,
+  useMarketRiskParams,
+} from "./hooks/useClearingHouse";
 import { MARKET_IDS } from "./contracts/addresses";
 
 // Info Tooltip Component with Portal
@@ -77,6 +83,9 @@ export const TradingPanel = ({ selectedMarket }) => {
   const [size, setSize] = useState("");
   const [priceLimit, setPriceLimit] = useState("");
 
+  // Get connected wallet address
+  const { address } = useAccount();
+
   // Get market ID from market name
   const marketId = MARKET_IDS[selectedMarket] || MARKET_IDS["H100-PERP"];
 
@@ -84,7 +93,8 @@ export const TradingPanel = ({ selectedMarket }) => {
   const { accountValue, isLoading: isLoadingAccount } = useAccountValue();
 
   // Get market risk parameters
-  const { riskParams, isLoading: isLoadingRiskParams } = useMarketRiskParams(marketId);
+  const { riskParams, isLoading: isLoadingRiskParams } =
+    useMarketRiskParams(marketId);
 
   // Trading hook
   const {
@@ -121,11 +131,41 @@ export const TradingPanel = ({ selectedMarket }) => {
         </div>,
         { id: "trade", duration: 5000 }
       );
+
+      // Save trade to Supabase for trade history
+      const saveTrade = async () => {
+        if (!address || !market) return;
+
+        const tradeData = {
+          user_address: address.toLowerCase(),
+          market: market.displayName || market.name,
+          side: side === "Buy" ? "Long" : "Short",
+          size: parseFloat(size),
+          price: parseFloat(market.price) || 0,
+          notional: parseFloat(size) * (parseFloat(market.price) || 0),
+          tx_hash: hash,
+        };
+
+        try {
+          const { error } = await supabase
+            .from("trade_history")
+            .insert([tradeData]);
+
+          if (error) {
+            console.warn("Error saving trade history:", error.message);
+          }
+        } catch (err) {
+          console.warn("Error saving trade:", err);
+        }
+      };
+
+      saveTrade();
+
       // Reset form
       setSize("");
       setPriceLimit("");
     }
-  }, [isSuccess, hash]);
+  }, [isSuccess, hash, address, market, side, size]);
 
   // Handle trade error with useEffect to avoid infinite re-renders
   useEffect(() => {
@@ -184,9 +224,8 @@ export const TradingPanel = ({ selectedMarket }) => {
 
     // Max position size = (Account Value / Price) / IMR
     // This represents max GPU hours you can buy with your collateral
-    const maxPositionSize = accountValueNum > 0
-      ? (accountValueNum / currentPrice) / imr
-      : 0;
+    const maxPositionSize =
+      accountValueNum > 0 ? accountValueNum / currentPrice / imr : 0;
 
     // Calculate size for the selected percentage
     const calculatedSize = maxPositionSize * (percentage / 100);
@@ -219,8 +258,10 @@ export const TradingPanel = ({ selectedMarket }) => {
           // Warn if limit is way below market (would always fail)
           if (priceLimitNum < currentPrice * 0.5) {
             toast.error(
-              `Price limit $${priceLimitNum.toFixed(2)} is too low. Current price is $${currentPrice.toFixed(2)}. ` +
-              `For longs, set a limit above the current price.`
+              `Price limit $${priceLimitNum.toFixed(
+                2
+              )} is too low. Current price is $${currentPrice.toFixed(2)}. ` +
+                `For longs, set a limit above the current price.`
             );
             return;
           }
@@ -229,8 +270,10 @@ export const TradingPanel = ({ selectedMarket }) => {
           // Warn if limit is way above market (would always fail)
           if (priceLimitNum > currentPrice * 2) {
             toast.error(
-              `Price limit $${priceLimitNum.toFixed(2)} is too high. Current price is $${currentPrice.toFixed(2)}. ` +
-              `For shorts, set a limit below the current price or use 0 for market order.`
+              `Price limit $${priceLimitNum.toFixed(
+                2
+              )} is too high. Current price is $${currentPrice.toFixed(2)}. ` +
+                `For shorts, set a limit below the current price or use 0 for market order.`
             );
             return;
           }
@@ -412,7 +455,9 @@ export const TradingPanel = ({ selectedMarket }) => {
               {isLoadingRiskParams ? (
                 <span className="loading-text">...</span>
               ) : riskParams ? (
-                <span className="risk-value penalty">{riskParams.liquidationPenaltyPercent}%</span>
+                <span className="risk-value penalty">
+                  {riskParams.liquidationPenaltyPercent}%
+                </span>
               ) : (
                 <span className="na-text">N/A</span>
               )}
@@ -468,7 +513,9 @@ export const TradingPanel = ({ selectedMarket }) => {
               />
             </div>
             {priceLimit && parseFloat(priceLimit) > 0 && (
-              <div style={{ fontSize: "0.75rem", marginTop: "4px", color: "#888" }}>
+              <div
+                style={{ fontSize: "0.75rem", marginTop: "4px", color: "#888" }}
+              >
                 {side === "Buy" ? (
                   <span>
                     Max slippage:{" "}
@@ -481,8 +528,7 @@ export const TradingPanel = ({ selectedMarket }) => {
                   </span>
                 ) : (
                   <span>
-                    Min acceptable price: $
-                    {parseFloat(priceLimit).toFixed(2)} (
+                    Min acceptable price: ${parseFloat(priceLimit).toFixed(2)} (
                     {(
                       ((parseFloat(market.price) - parseFloat(priceLimit)) /
                         parseFloat(market.price)) *
@@ -518,7 +564,9 @@ export const TradingPanel = ({ selectedMarket }) => {
           <div className="size-slider-section">
             <div className="size-slider-header">
               <span className="size-slider-label">Quick Size</span>
-              <span className="size-slider-hint">% of max GPU hours (based on collateral)</span>
+              <span className="size-slider-hint">
+                % of max GPU hours (based on collateral)
+              </span>
             </div>
             <div className="size-slider">
               {[25, 50, 75, 100].map((p) => (

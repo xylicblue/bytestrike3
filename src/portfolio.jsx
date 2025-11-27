@@ -12,7 +12,6 @@ import {
   HiOutlineBolt,
   HiOutlineBanknotes,
   HiOutlineRectangleStack,
-  HiOutlineClipboardDocumentList,
   HiOutlineArrowsRightLeft,
   HiArrowUp,
   HiArrowDown,
@@ -87,12 +86,6 @@ const HistoryTabs = ({ activeTab, setActiveTab }) => (
       <HiOutlineRectangleStack /> Open Positions
     </button>
     <button
-      className={activeTab === "orders" ? "active" : ""}
-      onClick={() => setActiveTab("orders")}
-    >
-      <HiOutlineClipboardDocumentList /> Order History
-    </button>
-    <button
       className={activeTab === "trades" ? "active" : ""}
       onClick={() => setActiveTab("trades")}
     >
@@ -107,8 +100,8 @@ const PortfolioPage = () => {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [activeTab, setActiveTab] = useState("positions");
-  const [orderHistory, setOrderHistory] = useState([]);
   const [tradeHistory, setTradeHistory] = useState([]);
+  const [tradesLoading, setTradesLoading] = useState(false);
 
   // Get wallet connection and blockchain data
   const { address, isConnected } = useAccount();
@@ -147,31 +140,32 @@ const PortfolioPage = () => {
   }, [session]);
 
   useEffect(() => {
-    // Fetch order history from Supabase (if you have this table)
-    if (address) {
-      supabase
-        .from("orders")
-        .select("*")
-        .eq("user_address", address.toLowerCase())
-        .order("created_at", { ascending: false })
-        .limit(50)
-        .then(({ data, error }) => {
-          if (error) console.warn("Error fetching orders:", error.message);
-          if (data) setOrderHistory(data);
-        });
+    // Fetch trade history from Supabase
+    const fetchTradeHistory = async () => {
+      if (!address) return;
 
-      // Fetch trade history from Supabase (if you have this table)
-      supabase
-        .from("trades")
-        .select("*")
-        .eq("user_address", address.toLowerCase())
-        .order("created_at", { ascending: false })
-        .limit(50)
-        .then(({ data, error }) => {
-          if (error) console.warn("Error fetching trades:", error.message);
-          if (data) setTradeHistory(data);
-        });
-    }
+      setTradesLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from("trade_history")
+          .select("*")
+          .eq("user_address", address.toLowerCase())
+          .order("created_at", { ascending: false })
+          .limit(50);
+
+        if (error) {
+          console.warn("Error fetching trades:", error.message);
+        } else {
+          setTradeHistory(data || []);
+        }
+      } catch (err) {
+        console.warn("Error fetching trades:", err);
+      } finally {
+        setTradesLoading(false);
+      }
+    };
+
+    fetchTradeHistory();
   }, [address]);
 
   const renderContent = () => {
@@ -224,57 +218,12 @@ const PortfolioPage = () => {
             )}
           </div>
         );
-      case "orders":
-        return (
-          <div className="table-container">
-            {orderHistory.length === 0 ? (
-              <div className="empty-state">No order history available</div>
-            ) : (
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Market</th>
-                    <th>Type</th>
-                    <th>Side</th>
-                    <th>Price</th>
-                    <th>Amount</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {orderHistory.map((order, index) => (
-                    <tr key={index}>
-                      <td>{new Date(order.created_at).toLocaleString()}</td>
-                      <td>{order.market}</td>
-                      <td>{order.order_type}</td>
-                      <td
-                        className={
-                          order.side === "Buy" ? "text-green" : "text-red"
-                        }
-                      >
-                        {order.side}
-                      </td>
-                      <td>${parseFloat(order.price).toLocaleString()}</td>
-                      <td>{order.amount}</td>
-                      <td>
-                        <span
-                          className={`status-badge status-${order.status.toLowerCase()}`}
-                        >
-                          {order.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </div>
-        );
       case "trades":
         return (
           <div className="table-container">
-            {tradeHistory.length === 0 ? (
+            {tradesLoading ? (
+              <div className="loading-state">Loading trade history...</div>
+            ) : tradeHistory.length === 0 ? (
               <div className="empty-state">No trade history available</div>
             ) : (
               <table>
@@ -283,26 +232,45 @@ const PortfolioPage = () => {
                     <th>Date</th>
                     <th>Market</th>
                     <th>Side</th>
+                    <th>Size</th>
                     <th>Price</th>
-                    <th>Amount</th>
-                    <th>Fee</th>
+                    <th>Notional</th>
+                    <th>Tx Hash</th>
                   </tr>
                 </thead>
                 <tbody>
                   {tradeHistory.map((trade, index) => (
-                    <tr key={index}>
+                    <tr key={trade.id || index}>
                       <td>{new Date(trade.created_at).toLocaleString()}</td>
                       <td>{trade.market}</td>
                       <td
                         className={
-                          trade.side === "Buy" ? "text-green" : "text-red"
+                          trade.side === "Long" ? "text-green" : "text-red"
                         }
                       >
-                        {trade.side}
+                        <div className="side-cell">
+                          {trade.side === "Long" ? (
+                            <HiArrowUp />
+                          ) : (
+                            <HiArrowDown />
+                          )}{" "}
+                          {trade.side}
+                        </div>
                       </td>
-                      <td>${parseFloat(trade.price).toLocaleString()}</td>
-                      <td>{trade.amount}</td>
-                      <td>${parseFloat(trade.fee).toLocaleString()}</td>
+                      <td>{parseFloat(trade.size).toFixed(4)}</td>
+                      <td>${parseFloat(trade.price).toFixed(2)}</td>
+                      <td>${parseFloat(trade.notional).toFixed(2)}</td>
+                      <td>
+                        <a
+                          href={`https://sepolia.etherscan.io/tx/${trade.tx_hash}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="tx-link"
+                        >
+                          {trade.tx_hash?.slice(0, 6)}...
+                          {trade.tx_hash?.slice(-4)}
+                        </a>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

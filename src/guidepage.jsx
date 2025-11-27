@@ -483,15 +483,6 @@ const GuidePage = () => {
                 </div>
               </div>
             </div>
-
-            <div className="info-box green">
-              <p>
-                <strong>Remember:</strong> The ~$2 ETH you used is still in your
-                your wallet and fully refundable. You're not paying gas fees -
-                this small amount just proves you're a real person, not a bot
-                trying to spam the platform.
-              </p>
-            </div>
           </section>
 
           {/* Open Position */}
@@ -529,7 +520,7 @@ const GuidePage = () => {
                   </div>
                   <div className="mini-step">
                     <span className="mini-number">3</span>
-                    <span>Enter size: 0.1 ETH (start small)</span>
+                    <span>Enter size: 0.1 ETH</span>
                   </div>
                   <div className="mini-step">
                     <span className="mini-number">4</span>
@@ -556,7 +547,7 @@ const GuidePage = () => {
                   </div>
                   <div className="mini-step">
                     <span className="mini-number">3</span>
-                    <span>Enter size: 0.1 ETH (start small)</span>
+                    <span>Enter size: 0.1 ETH</span>
                   </div>
                   <div className="mini-step">
                     <span className="mini-number">4</span>
@@ -567,15 +558,6 @@ const GuidePage = () => {
                     <span>Click "Sell Short" and confirm</span>
                   </div>
                 </div>
-              </div>
-            </div>
-            <div className="info-box blue">
-              <div>
-                <p>
-                  <strong>Pro Tip:</strong> Start with small positions (0.1 ETH)
-                  to get familiar with the platform before trading larger
-                  amounts.
-                </p>
               </div>
             </div>
           </section>
