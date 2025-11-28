@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { supabase } from "./creatclient";
 import { useAccount } from "wagmi";
 import { useAllPositions, useAccountValue } from "./hooks/useClearingHouse";
+import { useMarkPrice } from "./hooks/useVAMM";
 import "./portfolio.css";
 
 import {
@@ -94,6 +95,46 @@ const HistoryTabs = ({ activeTab, setActiveTab }) => (
   </div>
 );
 
+// Position row component with unrealized PnL calculation
+const PositionRow = ({ pos }) => {
+  const { price: markPrice } = useMarkPrice(pos.vammAddress);
+
+  const entryPrice = parseFloat(pos.entryPriceX18);
+  const absSize = Math.abs(parseFloat(pos.size));
+  const currentPrice = markPrice ? parseFloat(markPrice) : 0;
+  const margin = parseFloat(pos.margin);
+  const realizedPnL = parseFloat(pos.realizedPnL);
+
+  // Calculate unrealized PnL (same formula as PositionPanel)
+  const unrealizedPnL = currentPrice > 0
+    ? pos.isLong
+      ? (currentPrice - entryPrice) * absSize
+      : (entryPrice - currentPrice) * absSize
+    : 0;
+
+  return (
+    <tr key={pos.marketId}>
+      <td>{pos.marketName}</td>
+      <td className={pos.isLong ? "text-green" : "text-red"}>
+        <div className="side-cell">
+          {pos.isLong ? <HiArrowUp /> : <HiArrowDown />}{" "}
+          {pos.isLong ? "Long" : "Short"}
+        </div>
+      </td>
+      <td>{absSize.toFixed(4)}</td>
+      <td>${entryPrice.toFixed(2)}</td>
+      <td>${currentPrice > 0 ? currentPrice.toFixed(2) : "..."}</td>
+      <td>${margin.toFixed(2)}</td>
+      <td className={unrealizedPnL >= 0 ? "text-green" : "text-red"}>
+        ${unrealizedPnL.toFixed(2)}
+      </td>
+      <td className={realizedPnL >= 0 ? "text-green" : "text-red"}>
+        ${realizedPnL.toFixed(2)}
+      </td>
+    </tr>
+  );
+};
+
 // --- MAIN PORTFOLIO PAGE COMPONENT ---
 
 const PortfolioPage = () => {
@@ -185,33 +226,15 @@ const PortfolioPage = () => {
                     <th>Side</th>
                     <th>Size</th>
                     <th>Entry Price</th>
+                    <th>Mark Price</th>
                     <th>Margin</th>
+                    <th>Unrealized P&L</th>
                     <th>Realized P&L</th>
                   </tr>
                 </thead>
                 <tbody>
                   {positions.map((pos) => (
-                    <tr key={pos.marketId}>
-                      <td>{pos.marketName}</td>
-                      <td className={pos.isLong ? "text-green" : "text-red"}>
-                        <div className="side-cell">
-                          {pos.isLong ? <HiArrowUp /> : <HiArrowDown />}{" "}
-                          {pos.isLong ? "Long" : "Short"}
-                        </div>
-                      </td>
-                      <td>{Math.abs(parseFloat(pos.size)).toFixed(4)}</td>
-                      <td>${parseFloat(pos.entryPriceX18).toFixed(2)}</td>
-                      <td>${parseFloat(pos.margin).toFixed(2)}</td>
-                      <td
-                        className={
-                          parseFloat(pos.realizedPnL) >= 0
-                            ? "text-green"
-                            : "text-red"
-                        }
-                      >
-                        ${parseFloat(pos.realizedPnL).toFixed(2)}
-                      </td>
-                    </tr>
+                    <PositionRow key={pos.marketId} pos={pos} />
                   ))}
                 </tbody>
               </table>
