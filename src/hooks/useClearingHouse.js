@@ -1,25 +1,34 @@
 // Hooks for ClearingHouse contract interactions
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi';
-import { parseUnits, formatUnits } from 'ethers';
-import { SEPOLIA_CONTRACTS, MARKET_IDS, COLLATERAL_TOKENS } from '../contracts/addresses';
-import ClearingHouseABI from '../contracts/abis/ClearingHouse.json';
-import CollateralVaultABI from '../contracts/abis/CollateralVault.json';
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+} from "wagmi";
+import { parseUnits, formatUnits } from "ethers";
+import {
+  SEPOLIA_CONTRACTS,
+  MARKET_IDS,
+  COLLATERAL_TOKENS,
+} from "../contracts/addresses";
+import ClearingHouseABI from "../contracts/abis/ClearingHouse.json";
+import CollateralVaultABI from "../contracts/abis/CollateralVault.json";
 
 const SEPOLIA_CHAIN_ID = 11155111;
 const MARKET_POSITION_CONFIG = [
   {
-    key: 'H100-PERP',
-    marketId: MARKET_IDS['H100-PERP'],
+    key: "H100-PERP",
+    marketId: MARKET_IDS["H100-PERP"],
     vammAddress: SEPOLIA_CONTRACTS.vammProxy, // ⭐ Active vAMM ($3.79/hour)
-    displayName: 'H100 GPU ($3.79/hr)',
-    baseAssetSymbol: 'GPU-HRS',
+    displayName: "H100 GPU ($3.79/hr)",
+    baseAssetSymbol: "GPU-HRS",
   },
   {
-    key: 'ETH-PERP',
-    marketId: MARKET_IDS['ETH-PERP'],
+    key: "ETH-PERP",
+    marketId: MARKET_IDS["ETH-PERP"],
     vammAddress: SEPOLIA_CONTRACTS.vammProxyOld, // Deprecated test market
-    displayName: 'Test Market (Deprecated)',
-    baseAssetSymbol: 'ETH',
+    displayName: "Test Market (Deprecated)",
+    baseAssetSymbol: "ETH",
   },
 ];
 
@@ -35,7 +44,7 @@ export function usePosition(marketId, userAddress = null) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
-    functionName: 'getPosition',
+    functionName: "getPosition",
     args: [addressToUse, marketId], // ABI signature: (address account, bytes32 marketId)
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -65,13 +74,15 @@ export function usePosition(marketId, userAddress = null) {
   const realizedPnL = data.realizedPnL || 0n;
 
   const position = {
-    size: size ? formatUnits(size, 18) : '0',
+    size: size ? formatUnits(size, 18) : "0",
     sizeRaw: size,
-    margin: margin ? formatUnits(margin, 18) : '0',
+    margin: margin ? formatUnits(margin, 18) : "0",
     marginRaw: margin,
-    entryPriceX18: entryPriceX18 ? formatUnits(entryPriceX18, 18) : '0',
-    lastFundingIndex: lastFundingIndex ? formatUnits(lastFundingIndex, 18) : '0',
-    realizedPnL: realizedPnL ? formatUnits(realizedPnL, 18) : '0',
+    entryPriceX18: entryPriceX18 ? formatUnits(entryPriceX18, 18) : "0",
+    lastFundingIndex: lastFundingIndex
+      ? formatUnits(lastFundingIndex, 18)
+      : "0",
+    realizedPnL: realizedPnL ? formatUnits(realizedPnL, 18) : "0",
     // Helper flags
     hasPosition: size && size !== 0n,
     isLong: size && size > 0n,
@@ -126,7 +137,7 @@ export function useAccountValue(userAddress = null) {
   const { data, isLoading, refetch } = useReadContract({
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
-    functionName: 'getAccountValue',
+    functionName: "getAccountValue",
     args: [addressToUse],
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -136,7 +147,8 @@ export function useAccountValue(userAddress = null) {
   });
 
   return {
-    accountValue: data !== undefined && data !== null ? formatUnits(data, 18) : '0',
+    accountValue:
+      data !== undefined && data !== null ? formatUnits(data, 18) : "0",
     accountValueRaw: data,
     isLoading,
     refetch,
@@ -148,8 +160,16 @@ export function useAccountValue(userAddress = null) {
  * @param {string} marketId - Market ID
  */
 export function useOpenPosition(marketId) {
-  const { writeContract, data: hash, isPending, error, reset } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    writeContract,
+    data: hash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const openPosition = (isLong, size, priceLimit = 0) => {
     const sizeWei = parseUnits(size.toString(), 18);
@@ -158,7 +178,7 @@ export function useOpenPosition(marketId) {
     writeContract({
       address: SEPOLIA_CONTRACTS.clearingHouse,
       abi: ClearingHouseABI.abi,
-      functionName: 'openPosition',
+      functionName: "openPosition",
       args: [marketId, isLong, sizeWei, priceLimitWei],
       chainId: SEPOLIA_CHAIN_ID,
       gas: 800000n, // Set reasonable gas limit for trading
@@ -181,7 +201,9 @@ export function useOpenPosition(marketId) {
  */
 export function useClosePosition(marketId) {
   const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const closePosition = (size, priceLimit = 0) => {
     const sizeWei = parseUnits(size.toString(), 18);
@@ -190,7 +212,7 @@ export function useClosePosition(marketId) {
     writeContract({
       address: SEPOLIA_CONTRACTS.clearingHouse,
       abi: ClearingHouseABI.abi,
-      functionName: 'closePosition',
+      functionName: "closePosition",
       args: [marketId, sizeWei, priceLimitWei],
       chainId: SEPOLIA_CHAIN_ID,
       gas: 700000n, // Set reasonable gas limit for closing
@@ -211,8 +233,20 @@ export function useClosePosition(marketId) {
  * @param {string} tokenAddress - Collateral token address (e.g., USDC)
  */
 export function useDeposit() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    writeContract,
+    data: hash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    isError: isTxError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const deposit = (tokenAddress, amount) => {
     // Amount should be in token's decimals (6 for USDC, 18 for WETH)
@@ -222,7 +256,7 @@ export function useDeposit() {
     writeContract({
       address: SEPOLIA_CONTRACTS.clearingHouse,
       abi: ClearingHouseABI.abi,
-      functionName: 'deposit',
+      functionName: "deposit",
       args: [tokenAddress, amountWei],
       chainId: SEPOLIA_CHAIN_ID,
       gas: 500000n, // Set reasonable gas limit
@@ -234,7 +268,9 @@ export function useDeposit() {
     isPending: isPending || isConfirming,
     isSuccess,
     error,
+    isTxError,
     hash,
+    reset,
   };
 }
 
@@ -243,8 +279,20 @@ export function useDeposit() {
  * @param {string} tokenAddress - Collateral token address
  */
 export function useWithdraw() {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
-  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
+  const {
+    writeContract,
+    data: hash,
+    isPending,
+    error,
+    reset,
+  } = useWriteContract();
+  const {
+    isLoading: isConfirming,
+    isSuccess,
+    isError: isTxError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
 
   const withdraw = (tokenAddress, amount) => {
     const decimals = tokenAddress === SEPOLIA_CONTRACTS.mockUSDC ? 6 : 18;
@@ -253,7 +301,7 @@ export function useWithdraw() {
     writeContract({
       address: SEPOLIA_CONTRACTS.clearingHouse,
       abi: ClearingHouseABI.abi,
-      functionName: 'withdraw',
+      functionName: "withdraw",
       args: [tokenAddress, amountWei],
       chainId: SEPOLIA_CHAIN_ID,
       gas: 400000n, // Set reasonable gas limit
@@ -265,7 +313,9 @@ export function useWithdraw() {
     isPending: isPending || isConfirming,
     isSuccess,
     error,
+    isTxError,
     hash,
+    reset,
   };
 }
 
@@ -277,7 +327,7 @@ export function useMarketRiskParams(marketId) {
   const { data, isLoading, error, refetch } = useReadContract({
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
-    functionName: 'marketRiskParams',
+    functionName: "marketRiskParams",
     args: [marketId],
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -287,7 +337,7 @@ export function useMarketRiskParams(marketId) {
   });
 
   // Debug logging
-  console.log('useMarketRiskParams Debug:', {
+  console.log("useMarketRiskParams Debug:", {
     marketId,
     isLoading,
     error: error?.message,
@@ -311,7 +361,7 @@ export function useMarketRiskParams(marketId) {
   const liquidationPenaltyBps = data[2] || data.liquidationPenaltyBps || 0n;
   const penaltyCap = data[3] || data.penaltyCap || 0n;
 
-  console.log('useMarketRiskParams Parsed:', {
+  console.log("useMarketRiskParams Parsed:", {
     imrBps: String(imrBps),
     mmrBps: String(mmrBps),
     liquidationPenaltyBps: String(liquidationPenaltyBps),
@@ -329,7 +379,7 @@ export function useMarketRiskParams(marketId) {
     liquidationPenaltyPercent: Number(liquidationPenaltyBps) / 100,
   };
 
-  console.log('useMarketRiskParams Final:', riskParams);
+  console.log("useMarketRiskParams Final:", riskParams);
 
   return {
     riskParams,
@@ -350,7 +400,7 @@ export function useLiquidationStatus(marketId, userAddress = null) {
   const { data: liquidationData, isLoading: isChecking } = useReadContract({
     address: SEPOLIA_CONTRACTS.clearingHouse,
     abi: ClearingHouseABI.abi,
-    functionName: 'isLiquidatable',
+    functionName: "isLiquidatable",
     args: enabled ? [addressToUse, marketId] : undefined,
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -359,21 +409,22 @@ export function useLiquidationStatus(marketId, userAddress = null) {
     },
   });
 
-  const { data: maintenanceData, isLoading: isFetchingMargin } = useReadContract({
-    address: SEPOLIA_CONTRACTS.clearingHouse,
-    abi: ClearingHouseABI.abi,
-    functionName: 'getMaintenanceMargin',
-    args: enabled ? [addressToUse, marketId] : undefined,
-    chainId: SEPOLIA_CHAIN_ID,
-    query: {
-      enabled,
-      refetchInterval: 5000,
-    },
-  });
+  const { data: maintenanceData, isLoading: isFetchingMargin } =
+    useReadContract({
+      address: SEPOLIA_CONTRACTS.clearingHouse,
+      abi: ClearingHouseABI.abi,
+      functionName: "getMaintenanceMargin",
+      args: enabled ? [addressToUse, marketId] : undefined,
+      chainId: SEPOLIA_CHAIN_ID,
+      query: {
+        enabled,
+        refetchInterval: 5000,
+      },
+    });
 
   return {
     isLiquidatable: Boolean(liquidationData),
-    maintenanceMargin: maintenanceData ? formatUnits(maintenanceData, 18) : '0',
+    maintenanceMargin: maintenanceData ? formatUnits(maintenanceData, 18) : "0",
     maintenanceMarginRaw: maintenanceData,
     isLoading: isChecking || isFetchingMargin,
   };
@@ -388,15 +439,19 @@ export function useVaultBalance(userAddress = null) {
   const { address: connectedAddress } = useAccount();
   const addressToUse = userAddress || connectedAddress;
 
-  console.log('[useVaultBalance] Address:', addressToUse);
-  console.log('[useVaultBalance] Vault:', SEPOLIA_CONTRACTS.collateralVault);
-  console.log('[useVaultBalance] mUSDC:', SEPOLIA_CONTRACTS.mockUSDC);
+  console.log("[useVaultBalance] Address:", addressToUse);
+  console.log("[useVaultBalance] Vault:", SEPOLIA_CONTRACTS.collateralVault);
+  console.log("[useVaultBalance] mUSDC:", SEPOLIA_CONTRACTS.mockUSDC);
 
   // Get mUSDC balance (6 decimals)
-  const { data: usdcBalance, refetch: refetchUSDC, error: usdcError } = useReadContract({
+  const {
+    data: usdcBalance,
+    refetch: refetchUSDC,
+    error: usdcError,
+  } = useReadContract({
     address: SEPOLIA_CONTRACTS.collateralVault,
     abi: CollateralVaultABI.abi,
-    functionName: 'balanceOf',
+    functionName: "balanceOf",
     args: [addressToUse, SEPOLIA_CONTRACTS.mockUSDC],
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -405,14 +460,14 @@ export function useVaultBalance(userAddress = null) {
     },
   });
 
-  console.log('[useVaultBalance] mUSDC Balance Raw:', usdcBalance);
-  console.log('[useVaultBalance] mUSDC Error:', usdcError);
+  console.log("[useVaultBalance] mUSDC Balance Raw:", usdcBalance);
+  console.log("[useVaultBalance] mUSDC Error:", usdcError);
 
   // Get mWETH balance (18 decimals)
   const { data: wethBalance, refetch: refetchWETH } = useReadContract({
     address: SEPOLIA_CONTRACTS.collateralVault,
     abi: CollateralVaultABI.abi,
-    functionName: 'balanceOf',
+    functionName: "balanceOf",
     args: [addressToUse, SEPOLIA_CONTRACTS.mockWETH],
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -422,10 +477,14 @@ export function useVaultBalance(userAddress = null) {
   });
 
   // Get total collateral value in USD (1e18)
-  const { data: totalCollateralValue, refetch: refetchTotal, error: totalError } = useReadContract({
+  const {
+    data: totalCollateralValue,
+    refetch: refetchTotal,
+    error: totalError,
+  } = useReadContract({
     address: SEPOLIA_CONTRACTS.collateralVault,
     abi: CollateralVaultABI.abi,
-    functionName: 'getAccountCollateralValueX18',
+    functionName: "getAccountCollateralValueX18",
     args: [addressToUse],
     chainId: SEPOLIA_CHAIN_ID,
     query: {
@@ -434,8 +493,8 @@ export function useVaultBalance(userAddress = null) {
     },
   });
 
-  console.log('[useVaultBalance] Total Collateral Raw:', totalCollateralValue);
-  console.log('[useVaultBalance] Total Collateral Error:', totalError);
+  console.log("[useVaultBalance] Total Collateral Raw:", totalCollateralValue);
+  console.log("[useVaultBalance] Total Collateral Error:", totalError);
 
   const refetchAll = () => {
     refetchUSDC();
@@ -443,14 +502,21 @@ export function useVaultBalance(userAddress = null) {
     refetchTotal();
   };
 
-  const formattedUSDC = usdcBalance !== undefined && usdcBalance !== null ? formatUnits(usdcBalance, 6) : '0';
-  const formattedWETH = wethBalance !== undefined && wethBalance !== null ? formatUnits(wethBalance, 18) : '0';
-  const formattedTotal = totalCollateralValue !== undefined && totalCollateralValue !== null
-    ? formatUnits(totalCollateralValue, 18)
-    : '0';
+  const formattedUSDC =
+    usdcBalance !== undefined && usdcBalance !== null
+      ? formatUnits(usdcBalance, 6)
+      : "0";
+  const formattedWETH =
+    wethBalance !== undefined && wethBalance !== null
+      ? formatUnits(wethBalance, 18)
+      : "0";
+  const formattedTotal =
+    totalCollateralValue !== undefined && totalCollateralValue !== null
+      ? formatUnits(totalCollateralValue, 18)
+      : "0";
 
-  console.log('[useVaultBalance] Formatted USDC:', formattedUSDC);
-  console.log('[useVaultBalance] Formatted Total:', formattedTotal);
+  console.log("[useVaultBalance] Formatted USDC:", formattedUSDC);
+  console.log("[useVaultBalance] Formatted Total:", formattedTotal);
 
   return {
     usdcBalance: formattedUSDC,

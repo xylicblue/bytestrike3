@@ -86,6 +86,8 @@ export function CollateralManager() {
     isSuccess: isDepositSuccess,
     hash: depositHash,
     error: depositError,
+    isTxError: isDepositTxError,
+    reset: resetDeposit,
   } = useDeposit();
   const {
     withdraw,
@@ -93,6 +95,8 @@ export function CollateralManager() {
     isSuccess: isWithdrawSuccess,
     hash: withdrawHash,
     error: withdrawError,
+    isTxError: isWithdrawTxError,
+    reset: resetWithdraw,
   } = useWithdraw();
 
   // Check token balance
@@ -274,7 +278,7 @@ export function CollateralManager() {
   // Handle approval transaction error
   useEffect(() => {
     if (isApproveTxError) {
-      toast.error("Approval transaction failed", { id: "approve" });
+      toast.error("Approval transaction failed on-chain", { id: "approve" });
     }
   }, [isApproveTxError]);
 
@@ -289,15 +293,26 @@ export function CollateralManager() {
     }
   }, [isDepositSuccess, refetchVaultBalance]);
 
-  // Handle deposit errors
+  // Handle deposit errors (user rejection)
   useEffect(() => {
     if (depositError) {
       const errorMsg = depositError.message?.includes("User rejected")
         ? "Transaction cancelled"
         : "Deposit failed";
       toast.error(errorMsg, { id: "deposit" });
+      resetDeposit();
     }
-  }, [depositError]);
+  }, [depositError, resetDeposit]);
+
+  // Handle deposit transaction failure on-chain (e.g., insufficient balance)
+  useEffect(() => {
+    if (isDepositTxError) {
+      toast.error("Deposit transaction failed on-chain. Check your balance.", {
+        id: "deposit",
+      });
+      resetDeposit();
+    }
+  }, [isDepositTxError, resetDeposit]);
 
   useEffect(() => {
     if (isWithdrawSuccess) {
@@ -306,15 +321,26 @@ export function CollateralManager() {
     }
   }, [isWithdrawSuccess]);
 
-  // Handle withdraw errors
+  // Handle withdraw errors (user rejection)
   useEffect(() => {
     if (withdrawError) {
       const errorMsg = withdrawError.message?.includes("User rejected")
         ? "Transaction cancelled"
         : "Withdrawal failed";
       toast.error(errorMsg, { id: "withdraw" });
+      resetWithdraw();
     }
-  }, [withdrawError]);
+  }, [withdrawError, resetWithdraw]);
+
+  // Handle withdraw transaction failure on-chain
+  useEffect(() => {
+    if (isWithdrawTxError) {
+      toast.error("Withdrawal transaction failed on-chain.", {
+        id: "withdraw",
+      });
+      resetWithdraw();
+    }
+  }, [isWithdrawTxError, resetWithdraw]);
 
   if (!isConnected) {
     return (

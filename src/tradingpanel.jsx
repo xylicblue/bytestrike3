@@ -97,10 +97,10 @@ export const TradingPanel = ({ selectedMarket }) => {
   const { totalCollateralValue, usdcBalance, wethBalance } = useVaultBalance();
 
   // Debug logging
-  console.log('[TradingPanel] accountValue:', accountValue);
-  console.log('[TradingPanel] totalCollateralValue:', totalCollateralValue);
-  console.log('[TradingPanel] usdcBalance:', usdcBalance);
-  console.log('[TradingPanel] wethBalance:', wethBalance);
+  console.log("[TradingPanel] accountValue:", accountValue);
+  console.log("[TradingPanel] totalCollateralValue:", totalCollateralValue);
+  console.log("[TradingPanel] usdcBalance:", usdcBalance);
+  console.log("[TradingPanel] wethBalance:", wethBalance);
 
   // Get market risk parameters
   const { riskParams, isLoading: isLoadingRiskParams } =
@@ -132,7 +132,7 @@ export const TradingPanel = ({ selectedMarket }) => {
   useEffect(() => {
     if (isSuccess && hash && hash !== handledTxHash) {
       setHandledTxHash(hash); // Mark this tx as handled
-      
+
       toast.success(
         <div>
           <div>Position opened successfully!</div>
@@ -180,7 +180,7 @@ export const TradingPanel = ({ selectedMarket }) => {
       // Reset form
       setSize("");
       setPriceLimit("");
-      
+
       // Reset the trade hook state after a short delay
       setTimeout(() => {
         resetTrade();
@@ -242,7 +242,8 @@ export const TradingPanel = ({ selectedMarket }) => {
     // Use vault balance as fallback if accountValue is 0
     const accountValueNum = parseFloat(accountValue) || 0;
     const vaultBalanceNum = parseFloat(totalCollateralValue) || 0;
-    const effectiveBalance = accountValueNum > 0 ? accountValueNum : vaultBalanceNum;
+    const effectiveBalance =
+      accountValueNum > 0 ? accountValueNum : vaultBalanceNum;
 
     const currentPrice = parseFloat(market?.markPriceRaw) || 3.79;
     const imr = riskParams?.imrPercent ? riskParams.imrPercent / 100 : 0.1; // Convert % to decimal
@@ -615,16 +616,21 @@ export const TradingPanel = ({ selectedMarket }) => {
                     const accountVal = parseFloat(accountValue) || 0;
                     const vaultVal = parseFloat(totalCollateralValue) || 0;
                     const displayValue = accountVal > 0 ? accountVal : vaultVal;
-                    return displayValue > 0 ? `$${displayValue.toFixed(2)}` : "$0.00";
+                    return displayValue > 0
+                      ? `$${displayValue.toFixed(2)}`
+                      : "$0.00";
                   })()}
             </span>
           </div>
 
           {/* Debug info - show vault balances */}
           {parseFloat(totalCollateralValue) > 0 && (
-            <div style={{ fontSize: "0.75rem", color: "#888", marginTop: "8px" }}>
+            <div
+              style={{ fontSize: "0.75rem", color: "#888", marginTop: "8px" }}
+            >
               Vault: {parseFloat(usdcBalance).toFixed(2)} USDC
-              {parseFloat(wethBalance) > 0 && ` + ${parseFloat(wethBalance).toFixed(4)} WETH`}
+              {parseFloat(wethBalance) > 0 &&
+                ` + ${parseFloat(wethBalance).toFixed(4)} WETH`}
             </div>
           )}
 
