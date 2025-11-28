@@ -73,8 +73,11 @@ export function CollateralManager() {
     error: approveError,
     reset: resetApprove,
   } = useWriteContract();
-  const { isLoading: isApprovingTx, isSuccess: isApproveSuccess, isError: isApproveTxError } =
-    useWaitForTransactionReceipt({ hash: approveHash });
+  const {
+    isLoading: isApprovingTx,
+    isSuccess: isApproveSuccess,
+    isError: isApproveTxError,
+  } = useWaitForTransactionReceipt({ hash: approveHash });
 
   // Deposit/Withdraw hooks
   const {
@@ -445,9 +448,9 @@ export function CollateralManager() {
           <span>Vault Balance:</span>
           <span className="value">
             {vaultBalance
-              ? parseFloat(formatUnits(vaultBalance, selectedToken.decimals)).toFixed(
-                  selectedToken.decimals === 6 ? 2 : 4
-                )
+              ? parseFloat(
+                  formatUnits(vaultBalance, selectedToken.decimals)
+                ).toFixed(selectedToken.decimals === 6 ? 2 : 4)
               : "0.00"}{" "}
             {selectedToken.symbol}
           </span>

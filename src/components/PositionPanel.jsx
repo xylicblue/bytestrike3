@@ -95,7 +95,8 @@ function PositionCard({
 
   // Get current mark price for this market's vAMM
   // Use the vammAddress directly from the position data, or determine from marketKey
-  const vammAddress = position.vammAddress ||
+  const vammAddress =
+    position.vammAddress ||
     (position.marketKey === "H100-PERP" || position.marketKey === "ETH-PERP-V2"
       ? SEPOLIA_CONTRACTS.vammProxy
       : SEPOLIA_CONTRACTS.vammProxyOld);
@@ -116,9 +117,13 @@ function PositionCard({
   const isProfitable = currentPnL >= 0;
 
   // Close position hook
-  const { closePosition, isPending, isSuccess, error: closeError, hash } = useClosePosition(
-    position.marketId
-  );
+  const {
+    closePosition,
+    isPending,
+    isSuccess,
+    error: closeError,
+    hash,
+  } = useClosePosition(position.marketId);
 
   const handleClose = (closeAmount) => {
     if (!closeAmount || parseFloat(closeAmount) <= 0) {
@@ -140,7 +145,9 @@ function PositionCard({
       setCloseSize("");
     } catch (error) {
       console.error("Close position error:", error);
-      toast.error("Failed to close position: " + error.message, { id: "close" });
+      toast.error("Failed to close position: " + error.message, {
+        id: "close",
+      });
     }
   };
 
@@ -196,7 +203,9 @@ function PositionCard({
         </div>
         <div className="detail-row">
           <span className="label">Size:</span>
-          <span className="value">{absSize.toFixed(4)} {position.baseAssetSymbol || 'GPU-HRS'}</span>
+          <span className="value">
+            {absSize.toFixed(4)} {position.baseAssetSymbol || "GPU-HRS"}
+          </span>
         </div>
         <div className="detail-row">
           <span className="label">Notional:</span>

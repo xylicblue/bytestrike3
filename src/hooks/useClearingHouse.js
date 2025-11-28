@@ -148,7 +148,7 @@ export function useAccountValue(userAddress = null) {
  * @param {string} marketId - Market ID
  */
 export function useOpenPosition(marketId) {
-  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { writeContract, data: hash, isPending, error, reset } = useWriteContract();
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const openPosition = (isLong, size, priceLimit = 0) => {
@@ -171,6 +171,7 @@ export function useOpenPosition(marketId) {
     isSuccess,
     error,
     hash,
+    reset,
   };
 }
 

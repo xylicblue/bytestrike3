@@ -113,6 +113,7 @@ export const TradingPanel = ({ selectedMarket }) => {
     isSuccess,
     error: tradeError,
     hash,
+    reset: resetTrade,
   } = useOpenPosition(marketId);
 
   // Get market name early to use in hooks
@@ -123,10 +124,15 @@ export const TradingPanel = ({ selectedMarket }) => {
   // IMPORTANT: This must be called before any conditional returns
   const { data: market, isLoading, error } = useMarketRealTimeData(marketName);
 
+  // Track if we've already handled this transaction to prevent duplicate toasts
+  const [handledTxHash, setHandledTxHash] = useState(null);
+
   // Handle trade success with useEffect to avoid infinite re-renders
   // IMPORTANT: useEffect must be called before conditional returns
   useEffect(() => {
-    if (isSuccess && hash) {
+    if (isSuccess && hash && hash !== handledTxHash) {
+      setHandledTxHash(hash); // Mark this tx as handled
+      
       toast.success(
         <div>
           <div>Position opened successfully!</div>
@@ -174,15 +180,21 @@ export const TradingPanel = ({ selectedMarket }) => {
       // Reset form
       setSize("");
       setPriceLimit("");
+      
+      // Reset the trade hook state after a short delay
+      setTimeout(() => {
+        resetTrade();
+      }, 100);
     }
-  }, [isSuccess, hash, address, market, side, size]);
+  }, [isSuccess, hash, handledTxHash, address, market, side, size, resetTrade]);
 
   // Handle trade error with useEffect to avoid infinite re-renders
   useEffect(() => {
     if (tradeError) {
       toast.error("Trade failed: " + tradeError.message, { id: "trade" });
+      resetTrade();
     }
-  }, [tradeError]);
+  }, [tradeError, resetTrade]);
 
   // Now we can do conditional returns
   if (!selectedMarket) {
