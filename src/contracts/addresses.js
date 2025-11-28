@@ -4,10 +4,11 @@
 
 export const SEPOLIA_CONTRACTS = {
   // Core Protocol Contracts
-  clearingHouse: '0x0BE85ed0948779a01efFB6b017ae87A4E9EB7FD6', // Proxy (V3: Decimal fix complete)
-  clearingHouseImpl: '0x02d8dcE5A4CF10FcE80F9479d379229ECB08937d', // V3 Implementation
+  clearingHouse: '0x18F863b1b0A3Eca6B2235dc1957291E357f490B0', // ⭐ NEW: Fresh ClearingHouse (V5 - clean state, fixed negative portfolio)
+  clearingHouseImpl: '0xB7c9ebEc73c45a4aE487bF5508976Ee70995b3b2', // V5 Implementation
+  clearingHouseOld: '0x0BE85ed0948779a01efFB6b017ae87A4E9EB7FD6', // Deprecated (had stale storage)
   marketRegistry: '0x01D2bdbed2cc4eC55B0eA92edA1aAb47d57627fD', // Active registry
-  collateralVault: '0xfe2c9c2A1f0c700d88C78dCBc2E7bD1a8BB30DF0', // Active vault
+  collateralVault: '0x86A10164eB8F55EA6765185aFcbF5e073b249Dd2', // New vault (clean - only mUSDC)
 
   // vAMMs
   vammProxy: '0xF7210ccC245323258CC15e0Ca094eBbe2DC2CD85', // ⭐ ACTIVE: H100-PERP vAMM ($3.79/hour, IMR 10%, MMR 5%)
@@ -45,7 +46,9 @@ export const DEFAULT_MARKET_ID = MARKET_IDS['H100-PERP']; // Active market: H100
 
 // Implementation Contracts (for reference)
 export const IMPLEMENTATIONS = {
-  clearingHouseV3: '0x02d8dcE5A4CF10FcE80F9479d379229ECB08937d', // Current (2025-01-21)
+  clearingHouseV5: '0xB7c9ebEc73c45a4aE487bF5508976Ee70995b3b2', // Current (2025-11-28) - Fresh deployment with clean state
+  clearingHouseV4: '0x56a18F7b3348bd35512CCb6710e55344E4Bddc85', // Deprecated (had stale storage)
+  clearingHouseV3: '0x02d8dcE5A4CF10FcE80F9479d379229ECB08937d', // Deprecated (2025-01-21)
   clearingHouseV2: '0x2EC22b3e3AC4Bc5427dCA20B70746de6E663f187', // Deprecated
   vammImpl: '0x2B83ca8210cCe6CB14Bc0cFdA2CDFD83021D743b', // Current
 };
@@ -99,6 +102,24 @@ export const CHAIN_CONFIG = {
 
 // Deployment History
 export const DEPLOYMENT_HISTORY = {
+  'fresh-clearinghouse-2025-11-28': {
+    date: '2025-11-28',
+    description: 'Fresh ClearingHouse deployment to fix stale storage from vault migration',
+    proxy: '0x18F863b1b0A3Eca6B2235dc1957291E357f490B0',
+    implementation: '0xB7c9ebEc73c45a4aE487bF5508976Ee70995b3b2',
+    changes: [
+      'Deployed new ClearingHouse proxy with clean state',
+      'Fixed negative portfolio values (was -$24.7M)',
+      'Connected to new CollateralVault (0x86A10164...)',
+      'No stale _totalReservedMargin mappings',
+      'Users must redeposit collateral to start trading',
+      'Added adminClearStuckPosition() emergency function',
+    ],
+    deprecated: {
+      oldProxy: '0x0BE85ed0948779a01efFB6b017ae87A4E9EB7FD6',
+      reason: 'Stale storage from vault migration caused negative portfolio values',
+    },
+  },
   'h100-perp-2025-11-27': {
     date: '2025-11-27',
     description: 'New H100-PERP market with proper risk parameters',
