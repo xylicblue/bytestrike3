@@ -70,8 +70,10 @@ export function CollateralManager() {
     writeContract: approveToken,
     data: approveHash,
     isPending: isApproving,
+    error: approveError,
+    reset: resetApprove,
   } = useWriteContract();
-  const { isLoading: isApprovingTx, isSuccess: isApproveSuccess } =
+  const { isLoading: isApprovingTx, isSuccess: isApproveSuccess, isError: isApproveTxError } =
     useWaitForTransactionReceipt({ hash: approveHash });
 
   // Deposit/Withdraw hooks
@@ -80,12 +82,14 @@ export function CollateralManager() {
     isPending: isDepositPending,
     isSuccess: isDepositSuccess,
     hash: depositHash,
+    error: depositError,
   } = useDeposit();
   const {
     withdraw,
     isPending: isWithdrawPending,
     isSuccess: isWithdrawSuccess,
     hash: withdrawHash,
+    error: withdrawError,
   } = useWithdraw();
 
   // Check token balance
@@ -253,6 +257,24 @@ export function CollateralManager() {
     }
   }, [isApproveSuccess, refetchAllowance]);
 
+  // Handle approval errors (user rejected or tx failed)
+  useEffect(() => {
+    if (approveError) {
+      const errorMsg = approveError.message?.includes("User rejected")
+        ? "Transaction cancelled"
+        : "Approval failed";
+      toast.error(errorMsg, { id: "approve" });
+      resetApprove();
+    }
+  }, [approveError, resetApprove]);
+
+  // Handle approval transaction error
+  useEffect(() => {
+    if (isApproveTxError) {
+      toast.error("Approval transaction failed", { id: "approve" });
+    }
+  }, [isApproveTxError]);
+
   useEffect(() => {
     if (isDepositSuccess) {
       toast.success("Collateral deposited successfully!", { id: "deposit" });
@@ -264,12 +286,32 @@ export function CollateralManager() {
     }
   }, [isDepositSuccess, refetchVaultBalance]);
 
+  // Handle deposit errors
+  useEffect(() => {
+    if (depositError) {
+      const errorMsg = depositError.message?.includes("User rejected")
+        ? "Transaction cancelled"
+        : "Deposit failed";
+      toast.error(errorMsg, { id: "deposit" });
+    }
+  }, [depositError]);
+
   useEffect(() => {
     if (isWithdrawSuccess) {
       toast.success("Collateral withdrawn successfully!", { id: "withdraw" });
       setAmount("");
     }
   }, [isWithdrawSuccess]);
+
+  // Handle withdraw errors
+  useEffect(() => {
+    if (withdrawError) {
+      const errorMsg = withdrawError.message?.includes("User rejected")
+        ? "Transaction cancelled"
+        : "Withdrawal failed";
+      toast.error(errorMsg, { id: "withdraw" });
+    }
+  }, [withdrawError]);
 
   if (!isConnected) {
     return (

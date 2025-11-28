@@ -1,5 +1,5 @@
 // Component to display user's open positions
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { toast } from "react-hot-toast";
 import { useAllPositions, useClosePosition } from "../hooks/useClearingHouse";
@@ -116,7 +116,7 @@ function PositionCard({
   const isProfitable = currentPnL >= 0;
 
   // Close position hook
-  const { closePosition, isPending, isSuccess, hash } = useClosePosition(
+  const { closePosition, isPending, isSuccess, error: closeError, hash } = useClosePosition(
     position.marketId
   );
 
@@ -140,13 +140,26 @@ function PositionCard({
       setCloseSize("");
     } catch (error) {
       console.error("Close position error:", error);
-      toast.error("Failed to close position: " + error.message);
+      toast.error("Failed to close position: " + error.message, { id: "close" });
     }
   };
 
-  if (isSuccess) {
-    toast.success("Position closed successfully!", { id: "close" });
-  }
+  // Handle close position success
+  useEffect(() => {
+    if (isSuccess) {
+      toast.success("Position closed successfully!", { id: "close" });
+    }
+  }, [isSuccess]);
+
+  // Handle close position errors
+  useEffect(() => {
+    if (closeError) {
+      const errorMsg = closeError.message?.includes("User rejected")
+        ? "Transaction cancelled"
+        : "Failed to close position";
+      toast.error(errorMsg, { id: "close" });
+    }
+  }, [closeError]);
 
   const isClosing = closingPosition === position.marketId;
 

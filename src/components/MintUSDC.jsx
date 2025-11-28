@@ -33,15 +33,22 @@ export function MintUSDC() {
   // Handle transaction feedback
   useEffect(() => {
     if (hash && isConfirming) {
-      toast.loading("Minting USDC...", { id: hash });
+      toast.loading("Minting USDC...", { id: "mint" });
     }
     if (isSuccess) {
-      toast.success("✅ Successfully minted 10,000 USDC!", { id: hash });
+      toast.success("✅ Successfully minted 10,000 USDC!", { id: "mint" });
     }
+  }, [hash, isConfirming, isSuccess]);
+
+  // Handle errors separately
+  useEffect(() => {
     if (error) {
-      toast.error(`❌ Mint failed: ${error.message}`, { id: "mint-error" });
+      const errorMsg = error.message?.includes("User rejected")
+        ? "Transaction cancelled"
+        : `Mint failed: ${error.message}`;
+      toast.error(errorMsg, { id: "mint" });
     }
-  }, [hash, isConfirming, isSuccess, error]);
+  }, [error]);
 
   const mintUSDC = () => {
     if (!isConnected) {
